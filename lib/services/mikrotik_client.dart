@@ -1,4 +1,5 @@
 abstract class MikrotikClient {
+  bool get isConnected;
   Future<Map<String, dynamic>> getSystemResources();
   Future<List<Map<String, dynamic>>> getInterfaceStats();
   Future<List<Map<String, dynamic>>> getHotspotUsers();

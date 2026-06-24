@@ -30,6 +30,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     '/main/profiles',
     '/main/hosts',
     '/main/settings',
+    '/main/feedback',
   ];
 
   int _getTabFromPath(String path) {
@@ -49,6 +50,9 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     }
     if (path == '/main/settings' || path.startsWith('/main/settings')) {
       return 4;
+    }
+    if (path == '/main/feedback' || path.startsWith('/main/feedback')) {
+      return 5;
     }
     return 0;
   }
@@ -171,6 +175,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
             TabItem(icon: Icons.add_rounded),
             TabItem(icon: Icons.router_rounded),
             TabItem(icon: Icons.settings_rounded),
+            TabItem(icon: Icons.feedback_rounded),
           ],
         ),
       ),

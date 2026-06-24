@@ -149,13 +149,15 @@ class Voucher {
 
   factory Voucher.fromJson(Map<String, dynamic> json) {
     return Voucher(
-      username: json['username'] as String,
-      password: json['password'] as String,
-      profile: json['profile'] as String,
+      username: (json['username'] as String?) ?? '',
+      password: (json['password'] as String?) ?? '',
+      profile: (json['profile'] as String?) ?? 'default',
       validity: json['validity'] as String?,
       dataLimit: json['dataLimit'] as String?,
       comment: json['comment'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
       firstUsedAt: json['firstUsedAt'] != null
           ? DateTime.parse(json['firstUsedAt'] as String)
           : null,

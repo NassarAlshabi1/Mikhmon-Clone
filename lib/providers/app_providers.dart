@@ -29,6 +29,7 @@ import '../screens/hotspot_users/hotspot_hosts_screen.dart';
 import '../screens/hotspot_users/hotspot_host_details_screen.dart';
 import '../screens/hotspot_users/dhcp_leases_screen.dart';
 import '../screens/hotspot_users/add_hotspot_user_screen.dart';
+import '../screens/hotspot_users/hotspot_user_details_screen.dart';
 import '../screens/hotspot_users/user_profiles_screen.dart';
 import '../screens/hotspot_users/voucher_generation_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -36,6 +37,7 @@ import '../screens/settings/voucher_template_editor_screen.dart';
 import '../screens/revenue/revenue_screen.dart';
 import '../screens/vouchers/vouchers_list_screen.dart';
 import '../screens/activity_logs/activity_logs_screen.dart';
+import '../screens/feedback/feedback_screen.dart';
 import '../screens/main/main_shell_screen.dart';
 import '../screens/files/files_screen.dart';
 
@@ -374,24 +376,48 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: ':id',
                 name: 'user_details',
-                pageBuilder: (context, state) => CustomTransitionPage(
-                  key: state.pageKey,
-                  child: const HotspotUsersScreen(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1, 0),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeInOut,
-                      )),
-                      child: child,
+                pageBuilder: (context, state) {
+                  final user = state.extra as HotspotUser?;
+                  if (user == null) {
+                    return CustomTransitionPage(
+                      key: state.pageKey,
+                      child: const Scaffold(
+                        body: Center(child: Text('User not found')),
+                      ),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1, 0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
+                          )),
+                          child: child,
+                        );
+                      },
                     );
-                  },
-                  transitionDuration: const Duration(milliseconds: 250),
-                ),
+                  }
+                  return CustomTransitionPage(
+                    key: state.pageKey,
+                    child: HotspotUserDetailsScreen(user: user),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeInOut,
+                        )),
+                        child: child,
+                      );
+                    },
+                    transitionDuration: const Duration(milliseconds: 250),
+                  );
+                },
               ),
             ],
           ),
@@ -496,6 +522,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'files',
             builder: (context, state) => const FilesScreen(),
           ),
+          GoRoute(
+            path: '/main/feedback',
+            name: 'feedback',
+            builder: (context, state) => const FeedbackScreen(),
+          ),
         ],
       ),
     ],
@@ -559,15 +590,15 @@ class HotspotUsersNotifier extends AsyncNotifier<PaginatedUsers> {
   int _currentPage = 1;
   final int _pageSize = 20;
   bool _timerStarted = false;
-  // Track recorded connections to avoid duplicate revenue entries
-  // Key: "username|loginTime" to uniquely identify each session
+  Timer? _refreshTimer;
   final Set<String> _recordedConnections = {};
 
   @override
   Future<PaginatedUsers> build() async {
+    ref.onDispose(() => _refreshTimer?.cancel());
     _currentPage = 1;
 
-    // Load recorded connections from cache on first build
+    // Record previously seen connections for revenue tracking
     if (_recordedConnections.isEmpty) {
       final cache = ref.read(cacheServiceProvider);
       _recordedConnections.addAll(cache.getRecordedConnections());
@@ -648,8 +679,7 @@ class HotspotUsersNotifier extends AsyncNotifier<PaginatedUsers> {
   void _startAutoRefresh() {
     if (_timerStarted) return;
     _timerStarted = true;
-    // Use Future.microtask to avoid blocking
-    Timer.periodic(const Duration(seconds: 10), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       Future.microtask(() => silentRefresh());
     });
   }
@@ -1512,6 +1542,8 @@ class VouchersNotifier extends AsyncNotifier<List<Voucher>> {
 
   @override
   Future<List<Voucher>> build() async {
+    ref.onDispose(() => _refreshTimer?.cancel());
+
     // Start auto-refresh for expired status
     _startAutoRefresh();
     
@@ -1556,12 +1588,6 @@ class VouchersNotifier extends AsyncNotifier<List<Voucher>> {
         refresh();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    // Use the native dispose from Riverpod if available, otherwise just clear timer
   }
 
   /// Add new vouchers to cache and update state
@@ -1799,7 +1825,6 @@ class IncomeNotifier extends AsyncNotifier<IncomeState> {
   }
 
   IncomeState _calculateState(List<SalesTransaction> transactions, String filter) {
-    final cache = ref.read(cacheServiceProvider);
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final firstOfMonth = DateTime(now.year, now.month, 1);
@@ -2028,11 +2053,12 @@ final hotspotHostsProvider =
 
 class HotspotHostsNotifier extends AsyncNotifier<List<HotspotHost>> {
   bool _timerStarted = false;
+  Timer? _refreshTimer;
 
   @override
   Future<List<HotspotHost>> build() async {
+    ref.onDispose(() => _refreshTimer?.cancel());
     final hosts = await _fetchHosts();
-    // Start auto-refresh when data becomes available
     _startAutoRefresh();
     return hosts;
   }
@@ -2056,7 +2082,7 @@ class HotspotHostsNotifier extends AsyncNotifier<List<HotspotHost>> {
   void _startAutoRefresh() {
     if (_timerStarted) return;
     _timerStarted = true;
-    Timer.periodic(const Duration(seconds: 15), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
       refresh();
     });
   }
@@ -2075,9 +2101,11 @@ final dhcpLeasesProvider =
 
 class DhcpLeasesNotifier extends AsyncNotifier<List<DhcpLease>> {
   bool _timerStarted = false;
+  Timer? _refreshTimer;
 
   @override
   Future<List<DhcpLease>> build() async {
+    ref.onDispose(() => _refreshTimer?.cancel());
     final leases = await _fetchLeases();
     _startAutoRefresh();
     return leases;
@@ -2193,7 +2221,7 @@ class DhcpLeasesNotifier extends AsyncNotifier<List<DhcpLease>> {
   void _startAutoRefresh() {
     if (_timerStarted) return;
     _timerStarted = true;
-    Timer.periodic(const Duration(seconds: 10), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       silentRefresh();
     });
   }

@@ -944,11 +944,11 @@ class RouterConnection {
 
   factory RouterConnection.fromJson(Map<String, dynamic> json) {
     return RouterConnection(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      host: json['host'] as String,
-      port: json['port'] as String,
-      username: json['username'] as String,
+      id: (json['id'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      host: (json['host'] as String?) ?? '',
+      port: (json['port'] as String?) ?? '',
+      username: (json['username'] as String?) ?? '',
       useRest: json['useRest'] as bool? ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)

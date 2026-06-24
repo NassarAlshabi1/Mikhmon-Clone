@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
-import '../../../services/models.dart';
 import '../../../utils/currency_formatter.dart';
 
 /// A compact "Quick Info" summary card showing key metrics

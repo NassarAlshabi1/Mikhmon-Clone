@@ -9,7 +9,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/app_providers.dart';
 import '../../services/models.dart';
-import '../../services/cache_service.dart';
 import '../../utils/currency_formatter.dart';
 import '../../utils/filter_utils.dart';
 import '../../utils/show_feedback.dart';
@@ -820,14 +819,6 @@ class _ProfileRevenueCard extends ConsumerWidget {
       default:
         return const Color(0xFF64748B); // Slate
     }
-  }
-
-  String _formatCurrency(WidgetRef ref, double value) {
-    final cache = ref.read(cacheServiceProvider);
-    final settings = cache.getAppSettings();
-    final currencyCode = settings?['currency'] as String? ?? 'USD';
-    final currencyInfo = CurrencyData.fromCode(currencyCode);
-    return CurrencyFormatter.format(value, currencyInfo);
   }
 }
 

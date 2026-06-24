@@ -42,7 +42,7 @@ class RouterOSService {
   }
 
   MikrotikClient? get client => _client;
-  bool get isConnected => _client != null;
+  bool get isConnected => _client?.isConnected ?? false;
 
   // Load all saved connections from secure storage
   Future<List<Map<String, dynamic>>> loadSavedConnections() async {
