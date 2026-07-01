@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/validators.dart';
+import '../../utils/network_scanner.dart';
 import '../../providers/app_providers.dart';
 import '../../services/models.dart';
-import '../../services/onboarding_service.dart';
-import '../../services/cache_service.dart';
 import '../../l10n/translations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -29,6 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isScanning = false;
   String? _errorMessage;
   bool _saveConnection = true;
   bool _useRestApi = false;
@@ -76,25 +76,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     Navigator.of(context).pop();
   }
 
-  Future<void> _enableDemoMode() async {
-    _showLoadingDialog();
+  Future<void> _scanNetwork() async {
+    setState(() => _isScanning = true);
     try {
-      await OnboardingService.setDemoMode(true);
-      await OnboardingService.setSetupCompleted();
-      final cache = CacheService();
-      await cache.populateDemoData();
-      if (mounted) {
-        Navigator.of(context).pop();
-        context.go('/main/dashboard');
+      final results = await NetworkScanner.scanForRouters();
+      if (!mounted) return;
+      if (results.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No MikroTik routers found on network')),
+        );
+        return;
       }
+      _showRouterListDialog(results);
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to enable demo mode: $e')),
+          SnackBar(content: Text('Scan failed: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isScanning = false);
     }
+  }
+
+  void _showRouterListDialog(List<NetworkScannerResult> results) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_tethering_rounded, size: 22, color: primaryColor),
+            const SizedBox(width: 8),
+            Text(
+              'Found ${results.length} Router${results.length > 1 ? 's' : ''}',
+              style: const TextStyle(color: Color(0xFF1E293B), fontSize: 18),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: results.length,
+            itemBuilder: (_, i) {
+              final r = results[i];
+              return ListTile(
+                leading: Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.router_rounded, color: primaryColor, size: 22),
+                ),
+                title: Text(r.ip, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text('Port ${r.port}${r.isRestApi ? ' (REST)' : ' (API)'}'),
+                trailing: Icon(Icons.add_rounded, color: primaryColor),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _ipController.text = r.ip;
+                  _portController.text = r.port.toString();
+                  setState(() => _useRestApi = r.isRestApi);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Close', style: TextStyle(color: Colors.grey[600])),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _login({RouterConnection? savedConnection}) async {
@@ -154,13 +210,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (mounted) {
         _hideLoadingDialog();
-        final setupDone = await OnboardingService.isSetupCompleted();
         if (mounted) {
-          if (setupDone) {
-            context.go('/main/dashboard');
-          } else {
-            context.go('/setup');
-          }
+          context.go('/main/dashboard');
         }
       }
     } catch (e) {
@@ -264,34 +315,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      if (_errorMessage != null)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
+                        if (_errorMessage != null)
+                          Column(
                             children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: Color(0xFFF43F5E),
-                                size: 20,
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Color(0xFFF43F5E),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _errorMessage!.replaceAll('Exception: ', ''),
+                                        style: const TextStyle(
+                                          color: Color(0xFFF43F5E),
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage!.replaceAll('Exception: ', ''),
-                                  style: const TextStyle(
-                                    color: Color(0xFFF43F5E),
-                                    fontSize: 13,
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    setState(() => _errorMessage = null);
+                                    _scanNetwork();
+                                  },
+                                  icon: Icon(Icons.wifi_find_rounded,
+                                      size: 16, color: Colors.green[700]),
+                                  label: Text(
+                                    'Find Router on Network',
+                                    style: TextStyle(
+                                      color: Colors.green[700],
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 8),
                             ],
                           ),
-                        ),
                       Row(
                         children: [
                           Expanded(
@@ -306,6 +380,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 hintText: AppStrings.of(context).hostHint,
                                 prefixIcon:
                                     const Icon(Icons.router_rounded, size: 20),
+                                suffixIcon: IconButton(
+                                  icon: _isScanning
+                                      ? SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: primaryColor,
+                                          ),
+                                        )
+                                      : Icon(Icons.wifi_find_rounded,
+                                          color: primaryColor, size: 20),
+                                  tooltip: 'Find Router',
+                                  onPressed: _isScanning ? null : _scanNetwork,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -526,19 +615,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: TextButton(
-                          onPressed: () => _enableDemoMode(),
-                          child: Text(
-                            AppStrings.of(context).tryDemoData,
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 13,
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(height: 8),

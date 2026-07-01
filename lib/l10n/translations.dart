@@ -173,12 +173,6 @@ class AppStrings {
         'ms': 'Pengguna dikemaskini'
       });
 
-  String get tryDemoData => _get({
-        'en': 'Try with Demo Data',
-        'id': 'Coba dengan Data Demo',
-        'ms': 'Cuba dengan Data Demo'
-      });
-
   // ─── Quick Setup ───
   String get quickSetup => _get({
         'en': 'Quick Setup',

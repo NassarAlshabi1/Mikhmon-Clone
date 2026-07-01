@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../services/onboarding_service.dart';
-import '../../services/cache_service.dart';
 import '../../l10n/translations.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -43,23 +42,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  Future<void> _completeOnboarding({bool demoMode = false}) async {
+  Future<void> _completeOnboarding() async {
     await OnboardingService.setCompleted();
     await OnboardingService.setAgreementAccepted();
-
-    if (demoMode) {
-      await OnboardingService.setDemoMode(true);
-      await OnboardingService.setSetupCompleted();
-      // Populate demo data
-      final cache = CacheService();
-      await cache.populateDemoData();
-      if (mounted) {
-        context.go('/main/dashboard');
-      }
-    } else {
-      if (mounted) {
-        context.go('/');
-      }
+    if (mounted) {
+      context.go('/');
     }
   }
 
@@ -492,7 +479,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             height: 52,
             child: ElevatedButton(
               onPressed: _agreedToTerms
-                  ? () => _completeOnboarding(demoMode: false)
+                  ? () => _completeOnboarding()
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.appPrimary,
@@ -512,39 +499,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const SizedBox(width: 8),
                   Text(
                     AppStrings.of(context).connectToRouter,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Try demo button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: OutlinedButton(
-              onPressed: () => _completeOnboarding(demoMode: true),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.appPrimary,
-                side: BorderSide(
-                  color: context.appPrimary.withValues(alpha: 0.3),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.visibility_rounded),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppStrings.of(context).tryDemoData,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

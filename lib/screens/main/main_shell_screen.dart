@@ -5,14 +5,7 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/global_search.dart';
 import '../../widgets/router_switcher.dart';
-import '../../l10n/translations.dart';
-import '../../services/onboarding_service.dart';
-import '../../services/cache_service.dart';
 import '../../providers/app_providers.dart';
-
-final isDemoModeProvider = FutureProvider<bool>((ref) async {
-  return await OnboardingService.isDemoMode();
-});
 
 class MainShellScreen extends ConsumerStatefulWidget {
   final Widget child;
@@ -87,57 +80,6 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
         ),
         body: Column(
           children: [
-            // Demo mode banner
-            Consumer(
-              builder: (context, ref, _) {
-                final isDemoAsync = ref.watch(isDemoModeProvider);
-                return isDemoAsync.when(
-                  data: (isDemo) {
-                    if (!isDemo) return const SizedBox.shrink();
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      color: Colors.orange.withValues(alpha: 0.9),
-                      child: Row(
-                        children: [
-                          Icon(Icons.science_rounded,
-                              color: Colors.white, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Demo Mode - Data is simulated',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => _showLogoutDialog(context),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text('Exit',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
-              },
-            ),
             Expanded(
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
@@ -250,37 +192,4 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Exit Demo Mode?'),
-        content: Text('You will be redirected to the login screen.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppStrings.of(context).cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await OnboardingService.setDemoMode(false);
-              await OnboardingService.clearAll();
-              // Clear demo data from cache
-              final cache = CacheService();
-              await cache.clearAllDemoData();
-              if (context.mounted) {
-                context.go('/');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Exit Demo'),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -1207,10 +1207,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () async {
               Navigator.pop(ctx);
               await ref.read(authStateProvider.notifier).logout();
-              await OnboardingService.setDemoMode(false);
-              // Clear demo data from cache when logging out
-              final cache = CacheService();
-              await cache.clearAllDemoData();
               if (context.mounted) {
                 context.go('/');
               }

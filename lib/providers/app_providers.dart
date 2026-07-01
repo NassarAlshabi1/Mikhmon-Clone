@@ -1382,7 +1382,7 @@ class UserProfileNotifier extends AsyncNotifier<List<UserProfile>> {
     try {
       // Clear cache to force re-parsing with updated logic
       final cache = ref.read(cacheServiceProvider);
-      await cache.clearUserProfiles();
+      await cache.clearEntry('user_profiles');
       
       final newData = await _fetchProfilesAndCache();
       if (newData.isNotEmpty) {

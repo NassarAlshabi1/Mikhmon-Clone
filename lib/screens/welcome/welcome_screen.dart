@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../utils/network_scanner.dart';
+import '../../services/onboarding_service.dart';
 import '../../providers/app_providers.dart';
 import '../../services/models.dart';
-import '../../services/onboarding_service.dart';
-import '../../services/cache_service.dart';
 import '../../l10n/translations.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
@@ -36,25 +36,96 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     }
   }
 
-  Future<void> _enableDemoMode() async {
-    _showLoadingDialog();
+  Future<void> _scanNetwork() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        content: Row(
+          children: [
+            CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+            ),
+            const SizedBox(width: 16),
+            const Text('Scanning network...',
+                style: TextStyle(color: Color(0xFF1E293B))),
+          ],
+        ),
+      ),
+    );
     try {
-      await OnboardingService.setDemoMode(true);
-      await OnboardingService.setSetupCompleted();
-      final cache = CacheService();
-      await cache.populateDemoData();
-      if (mounted) {
-        Navigator.of(context).pop();
-        context.go('/main/dashboard');
+      final results = await NetworkScanner.scanForRouters();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      if (results.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No MikroTik routers found on network')),
+        );
+        return;
       }
+      _showRouterListDialog(results);
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to enable demo mode: $e')),
+          SnackBar(content: Text('Scan failed: $e')),
         );
       }
     }
+  }
+
+  void _showRouterListDialog(List<NetworkScannerResult> results) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_tethering_rounded, size: 22, color: primaryColor),
+            const SizedBox(width: 8),
+            Text(
+              'Found ${results.length} Router${results.length > 1 ? 's' : ''}',
+              style: const TextStyle(color: Color(0xFF1E293B), fontSize: 18),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: results.length,
+            itemBuilder: (_, i) {
+              final r = results[i];
+              return ListTile(
+                leading: Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.router_rounded, color: primaryColor, size: 22),
+                ),
+                title: Text(r.ip, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text('Port ${r.port}${r.isRestApi ? ' (REST)' : ' (API)'}'),
+                trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.push('/login');
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Close', style: TextStyle(color: Colors.grey[600])),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _quickLogin(RouterConnection connection, String password) async {
@@ -109,10 +180,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     Navigator.of(context).pop();
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, {VoidCallback? onRetry}) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         title: Row(
           children: [
@@ -129,8 +200,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           style: const TextStyle(color: Color(0xFF64748B)),
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (onRetry != null) {
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  _scanNetwork();
+                });
+              }
+            },
+            child: Text('Find Router',
+                style: TextStyle(color: Colors.green[700])),
+          ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               foregroundColor: Colors.white,
@@ -270,14 +353,34 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           ),
                         ),
                       ),
-                      // Demo mode button - always available
-                      TextButton(
-                        onPressed: () => _enableDemoMode(),
-                        child: Text(
-                          AppStrings.of(context).tryDemoData,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () => _scanNetwork(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.green.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.wifi_find_rounded,
+                                  color: Colors.green, size: 20),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Find Router on Network',
+                                style: TextStyle(
+                                  color: Colors.green.shade700,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

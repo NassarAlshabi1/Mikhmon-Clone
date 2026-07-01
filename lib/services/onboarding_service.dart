@@ -15,7 +15,6 @@ class OnboardingService {
   static const _completedKey = 'onboarding_completed';
   static const _agreedKey = 'user_agreement_accepted';
   static const _lastVersionKey = 'last_seen_version';
-  static const _demoModeKey = 'demo_mode_enabled';
   static const _setupCompletedKey = 'setup_completed';
 
   // Current app version - update this when releasing new features
@@ -59,15 +58,6 @@ class OnboardingService {
     await _storage.write(key: _lastVersionKey, value: version);
   }
 
-  static Future<bool> isDemoMode() async {
-    final value = await _storage.read(key: _demoModeKey);
-    return value == 'true';
-  }
-
-  static Future<void> setDemoMode(bool enabled) async {
-    await _storage.write(key: _demoModeKey, value: enabled ? 'true' : 'false');
-  }
-
   static Future<bool> isSetupCompleted() async {
     final value = await _storage.read(key: _setupCompletedKey);
     return value == 'true';
@@ -81,7 +71,6 @@ class OnboardingService {
     await _storage.delete(key: _completedKey);
     await _storage.delete(key: _agreedKey);
     await _storage.delete(key: _lastVersionKey);
-    await _storage.delete(key: _demoModeKey);
     await _storage.delete(key: _setupCompletedKey);
   }
 

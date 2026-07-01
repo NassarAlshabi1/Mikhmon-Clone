@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../../services/models.dart';
-import '../../services/onboarding_service.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/skeleton_loader.dart';
 import 'widgets/expandable_chart.dart';
@@ -264,42 +263,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
               ),
             ),
-            FutureBuilder<bool>(
-              future: OnboardingService.isDemoMode(),
-              builder: (context, snapshot) {
-                final isDemo = snapshot.data ?? false;
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isDemo
-                        ? Colors.orange.withValues(alpha: 0.15)
-                        : Colors.green.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_done_rounded, size: 14, color: Colors.green),
+                  SizedBox(width: 4),
+                  Text('Live',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isDemo
-                            ? Icons.science_rounded
-                            : Icons.cloud_done_rounded,
-                        size: 14,
-                        color: isDemo ? Colors.orange : Colors.green,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isDemo ? 'Demo' : 'Live',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: isDemo ? Colors.orange : Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ],
+              ),
             ),
           ],
         ),
