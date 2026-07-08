@@ -9,10 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 import '../../services/pdf_template_service.dart';
+import '../../services/models.dart';
 import '../../utils/snackbar_helpers.dart';
 
 class EditPdfTemplateScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> profiles;
+  /// قائمة الفئات المتاحة من الراوتر. كل فئة لها اسم (UserProfile.name)
+  /// يُستخدم كمفتاح لربط القالب بالفئة.
+  final List<UserProfile> profiles;
   final PdfTemplate? existingTemplate;
 
   const EditPdfTemplateScreen({
@@ -223,9 +226,8 @@ class _EditPdfTemplateScreenState extends State<EditPdfTemplateScreen> {
                                 prefixIcon: Icon(Icons.category_outlined)),
                             items: widget.profiles
                                 .map((p) => DropdownMenuItem(
-                                      value: p['name'] as String,
-                                      child:
-                                          Text(p['name'] as String),
+                                      value: p.name,
+                                      child: Text(p.name),
                                     ))
                                 .toList(),
                             onChanged: (v) =>

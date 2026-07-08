@@ -1,22 +1,28 @@
 // ============================================================
 //  PdfTemplatesScreen — قائمة إدارة قوالب PDF
-//  (تستبدل pdf_templates_editor_screen القديم)
+//
+//  - يجلب الفئات تلقائياً من userProfileProvider (Riverpod)
+//  - يعرض كل قالب مع اسم الفئة المرتبط به
+//  - يعرض حالة الربط: أي فئات ليس لها قالب بعد
+//  - يدعم إضافة/تعديل/حذف القوالب
 // ============================================================
 
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/app_providers.dart';
 import '../../services/pdf_template_service.dart';
+import '../../services/models.dart';
 import '../../utils/snackbar_helpers.dart';
 import 'edit_pdf_template_screen.dart';
 
 class PdfTemplatesScreen extends ConsumerStatefulWidget {
-  /// قائمة الفئات المتاحة لإنشاء قالب جديد لها.
-  /// كل عنصر خريطة تحتوي على الأقل على مفتاح 'name'.
-  final List<Map<String, dynamic>> profiles;
+  /// اختياري: تمرير قائمة فئات يدوياً (للاختبار أو الاستخدام الخارجي).
+  /// إذا تُركت فارغة، تُجلب تلقائياً من userProfileProvider.
+  final List<Map<String, dynamic>>? profiles;
 
-  const PdfTemplatesScreen({super.key, this.profiles = const []});
+  const PdfTemplatesScreen({super.key, this.profiles});
 
   @override
   ConsumerState<PdfTemplatesScreen> createState() => _PdfTemplatesScreenState();
@@ -37,6 +43,22 @@ class _PdfTemplatesScreenState extends ConsumerState<PdfTemplatesScreen> {
     final service = PdfTemplateService();
     _templates = await service.getAllTemplates();
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  /// جلب الفئات المتاحة من userProfileProvider أو widget.profiles
+  List<UserProfile> _getProfiles() {
+    if (widget.profiles != null && widget.profiles!.isNotEmpty) {
+      // تحويل Map إلى UserProfile (للتوافق العكسي)
+      return widget.profiles!
+          .map((p) => UserProfile(
+                id: p['id']?.toString() ?? '',
+                name: p['name']?.toString() ?? '',
+              ))
+          .toList();
+    }
+    // الجلب من Riverpod
+    final asyncProfiles = ref.read(userProfileProvider);
+    return asyncProfiles.value ?? [];
   }
 
   Future<void> _deleteTemplate(PdfTemplate templateToDelete) async {
@@ -77,38 +99,116 @@ class _PdfTemplatesScreenState extends ConsumerState<PdfTemplatesScreen> {
     }
   }
 
-  void _navigateAndReload(Widget screen) async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => screen));
+  void _navigateAndReload(List<UserProfile> profiles,
+      {PdfTemplate? existingTemplate}) async {
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => EditPdfTemplateScreen(
+        profiles: profiles,
+        existingTemplate: existingTemplate,
+      ),
+    ));
     if (mounted) _loadTemplates();
   }
 
   @override
   Widget build(BuildContext context) {
+    // مراقبة الفئات من Riverpod لإعادة البناء عند تغيرها
+    ref.watch(userProfileProvider);
+
+    final profiles = _getProfiles();
+    final unlinkedProfiles = profiles
+        .where((p) => !_templates.any((t) => t.profileName == p.name))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('إدارة قوالب PDF'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _templates.isEmpty
-              ? _buildEmptyView()
-              : RefreshIndicator(
-                  onRefresh: _loadTemplates,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: _templates.length,
-                    itemBuilder: (context, index) {
-                      final template = _templates[index];
-                      return _buildTemplateCard(template);
-                    },
-                  ),
-                ),
+          : RefreshIndicator(
+              onRefresh: _loadTemplates,
+              child: CustomScrollView(
+                slivers: [
+                  // قسم: فئات بدون قوالب (تنبيه)
+                  if (unlinkedProfiles.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: _buildUnlinkedWarning(unlinkedProfiles),
+                    ),
+                  // قسم: القوالب المحفوظة
+                  if (_templates.isEmpty)
+                    SliverFillRemaining(
+                      child: _buildEmptyView(profiles.isEmpty),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.all(12),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) =>
+                              _buildTemplateCard(_templates[index]),
+                          childCount: _templates.length,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateAndReload(
-            EditPdfTemplateScreen(profiles: widget.profiles)),
+        onPressed: profiles.isEmpty
+            ? () => showErrorSnackBar(context,
+                'لا توجد فئات متاحة. تأكد من الاتصال بالراوتر أولاً.')
+            : () => _navigateAndReload(profiles),
         tooltip: 'إضافة قالب جديد',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  /// تنبيه يوضح أي فئات ليس لها قالب بعد
+  Widget _buildUnlinkedWarning(List<UserProfile> unlinkedProfiles) {
+    return Card(
+      margin: const EdgeInsets.all(12),
+      color: Colors.orange.shade50,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded,
+                    color: Colors.orange.shade700, size: 24),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'فئات بدون قالب (${unlinkedProfiles.length})',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: unlinkedProfiles.map((p) {
+                return Chip(
+                  label: Text(p.name),
+                  backgroundColor: Colors.orange.shade100,
+                  labelStyle: TextStyle(color: Colors.orange.shade900),
+                  avatar: Icon(Icons.style_outlined,
+                      size: 18, color: Colors.orange.shade700),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -143,15 +243,54 @@ class _PdfTemplatesScreenState extends ConsumerState<PdfTemplatesScreen> {
             ),
             const SizedBox(height: 12),
             // اسم الفئة
-            Text(
-              'قالب فئة: ${template.profileName}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                const Icon(Icons.category_outlined, size: 18),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'فئة: ${template.profileName}',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                // شارة "مرتبط"
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.link_rounded,
+                          size: 14, color: Colors.green.shade700),
+                      const SizedBox(width: 4),
+                      Text(
+                        'مرتبط',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green.shade900,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
-            // عدد الكروت
+            // عدد الكروت + معلومات المربع
             Text(
               'عدد الكروت بالصفحة: ${template.cardsPerPage}',
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'موضع النص: (${(template.textXRatio * 100).toStringAsFixed(0)}%, ${(template.textYRatio * 100).toStringAsFixed(0)}%) • حجم المربع: ${(template.markerWidthRatio * 100).toStringAsFixed(0)}% × ${(template.markerHeightRatio * 100).toStringAsFixed(0)}%',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             const Divider(height: 24),
             // أزرار الإجراءات
@@ -167,10 +306,8 @@ class _PdfTemplatesScreenState extends ConsumerState<PdfTemplatesScreen> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: () => _navigateAndReload(EditPdfTemplateScreen(
-                    profiles: widget.profiles,
-                    existingTemplate: template,
-                  )),
+                  onPressed: () => _navigateAndReload(_getProfiles(),
+                      existingTemplate: template),
                   icon: const Icon(Icons.edit_outlined, size: 20),
                   label: const Text('تعديل'),
                 ),
@@ -182,22 +319,29 @@ class _PdfTemplatesScreenState extends ConsumerState<PdfTemplatesScreen> {
     );
   }
 
-  Widget _buildEmptyView() {
+  Widget _buildEmptyView(bool noProfiles) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.style_outlined, size: 80, color: Colors.grey.shade400),
+            Icon(
+              noProfiles ? Icons.cloud_off_outlined : Icons.style_outlined,
+              size: 80,
+              color: Colors.grey.shade400,
+            ),
             const SizedBox(height: 20),
-            const Text(
-              'لا توجد قوالب محفوظة',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Text(
+              noProfiles ? 'لا توجد فئات متاحة' : 'لا توجد قوالب محفوظة',
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
-              'اضغط على زر الإضافة (+) في الأسفل لإنشاء قالب PDF جديد خاص بك.',
+              noProfiles
+                  ? 'تأكد من الاتصال بالراوتر لجلب الفئات أولاً.'
+                  : 'اضغط على زر الإضافة (+) في الأسفل لإنشاء قالب PDF جديد خاص بكل فئة.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),

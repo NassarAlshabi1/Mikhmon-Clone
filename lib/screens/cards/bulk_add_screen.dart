@@ -10,6 +10,7 @@ import 'dart:math';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -377,6 +378,108 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
     });
   }
 
+  /// يعرض حالة القالب المرتبط بالفئة المختارة:
+  /// - إذا وجد قالب: يعرض اسم القالب + معاينة
+  /// - إذا لم يجد: يعرض رسالة تحذير مع زر لإنشاء قالب
+  Widget _buildTemplateStatusForProfile() {
+    // البحث في القوالب المحفوظة محلياً
+    final matchingTemplate = _templates
+        .where((t) => t.profileName == _selectedProfile)
+        .firstOrNull;
+
+    if (matchingTemplate != null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.green.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_outline_rounded,
+                color: Colors.green.shade700, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'قالب مرتبط بهذه الفئة',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green.shade900,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Text(
+                    'عدد الكروت بالصفحة: ${matchingTemplate.cardsPerPage}',
+                    style: TextStyle(
+                      color: Colors.green.shade800,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // معاينة مصغرة للصورة
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: Image.file(
+                  File(matchingTemplate.imagePath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.green.shade200,
+                    child: Icon(Icons.image_not_supported,
+                        size: 20, color: Colors.green.shade700),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber_rounded,
+              color: Colors.orange.shade700, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'لا يوجد قالب PDF مرتبط بهذه الفئة. سيتم تصدير الكروت كنص فقط.',
+              style: TextStyle(
+                color: Colors.orange.shade900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () => context.push('/main/templates/pdf'),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('إنشاء', style: TextStyle(fontSize: 12)),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _generateRandomString(int length, String type) {
     const charsMixed = 'abcdefghijklmnopqrstuvwxyz0123456789';
     const charsLetters = 'abcdefghijklmnopqrstuvwxyz';
@@ -501,6 +604,12 @@ class _BulkAddScreenState extends ConsumerState<BulkAddScreen> {
                           child: CircularProgressIndicator()),
                       error: (_, __) => const Text('تعذر تحميل الفئات'),
                     ),
+                    // عرض حالة القالب المرتبط بالفئة المختارة
+                    if (_selectedProfile != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: _buildTemplateStatusForProfile(),
+                      ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _charType,
