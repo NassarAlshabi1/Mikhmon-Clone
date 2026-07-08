@@ -32,3 +32,15 @@
 # Crypto
 -keep class java.security.** { *; }
 -keep class javax.crypto.** { *; }
+
+# ML Kit Text Recognition - missing classes for non-Latin scripts
+# These classes are referenced by google_mlkit_text_recognition but only
+# available if the corresponding bundled models are added as dependencies.
+-dontwarn com.google.mlkit.vision.text.chinese.**
+-dontwarn com.google.mlkit.vision.text.devanagari.**
+-dontwarn com.google.mlkit.vision.text.japanese.**
+-dontwarn com.google.mlkit.vision.text.korean.**
+-keep class com.google.mlkit.vision.text.latin.** { *; }
+-keep class com.google.mlkit.vision.text.** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_text.** { *; }
+-keep class com.google.mlkit.common.** { *; }
