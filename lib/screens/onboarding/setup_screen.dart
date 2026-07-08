@@ -16,11 +16,31 @@ class SetupScreen extends ConsumerStatefulWidget {
 
 class _SetupScreenState extends ConsumerState<SetupScreen> {
   final _companyController = TextEditingController();
-  String? _selectedCountry;
-  String? _selectedCurrency;
+  // Yemen is the default country and YER is the default currency.
+  String? _selectedCountry = 'Yemen';
+  String? _selectedCurrency = 'YER';
   bool _saving = false;
 
   static const _countries = [
+    // Arabic countries (default region)
+    'Yemen',
+    'Saudi Arabia',
+    'United Arab Emirates',
+    'Egypt',
+    'Jordan',
+    'Qatar',
+    'Kuwait',
+    'Bahrain',
+    'Oman',
+    'Iraq',
+    'Syria',
+    'Lebanon',
+    'Sudan',
+    'Libya',
+    'Morocco',
+    'Algeria',
+    'Tunisia',
+    // Southeast Asia
     'Indonesia',
     'Malaysia',
     'Philippines',
@@ -30,18 +50,40 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     'Cambodia',
     'Myanmar',
     'Laos',
+    // South Asia
     'Bangladesh',
     'India',
     'Pakistan',
+    // Africa
     'Nigeria',
     'Kenya',
     'Tanzania',
     'South Africa',
+    // Americas
     'Brazil',
     'Other',
   ];
 
   static const _currencies = {
+    // Arabic currencies
+    'YER': 'Yemeni Rial (ر.ي)',
+    'SAR': 'Saudi Riyal (﷼)',
+    'AED': 'UAE Dirham (د.إ)',
+    'EGP': 'Egyptian Pound (ج.م)',
+    'JOD': 'Jordanian Dinar (د.ا)',
+    'QAR': 'Qatari Riyal (﷼)',
+    'KWD': 'Kuwaiti Dinar (د.ك)',
+    'BHD': 'Bahraini Dinar (د.ب)',
+    'OMR': 'Omani Rial (﷼)',
+    'IQD': 'Iraqi Dinar (ع.د)',
+    'SYP': 'Syrian Pound (ل.س)',
+    'LBP': 'Lebanese Pound (ل.ل)',
+    'SDG': 'Sudanese Pound (ج.س)',
+    'LYD': 'Libyan Dinar (ل.د)',
+    'MAD': 'Moroccan Dirham (د.م)',
+    'DZD': 'Algerian Dinar (د.ج)',
+    'TND': 'Tunisian Dinar (د.ت)',
+    // Southeast Asian currencies
     'IDR': 'Indonesian Rupiah (Rp)',
     'MYR': 'Malaysian Ringgit (RM)',
     'PHP': 'Philippine Peso (₱)',
@@ -50,19 +92,41 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     'SGD': 'Singapore Dollar (S\$)',
     'KHR': 'Cambodian Riel (៛)',
     'MMK': 'Myanmar Kyat (K)',
+    // South Asian currencies
     'BDT': 'Bangladeshi Taka (৳)',
     'INR': 'Indian Rupee (₹)',
     'PKR': 'Pakistani Rupee (₨)',
+    // African currencies
     'NGN': 'Nigerian Naira (₦)',
     'KES': 'Kenyan Shilling (KSh)',
     'TZS': 'Tanzanian Shilling (TSh)',
     'ZAR': 'South African Rand (R)',
+    // Americas
     'BRL': 'Brazilian Real (R\$)',
     'USD': 'US Dollar (\$)',
   };
 
   // Auto-select currency based on country
   static const _countryCurrencyMap = {
+    // Arabic countries
+    'Yemen': 'YER',
+    'Saudi Arabia': 'SAR',
+    'United Arab Emirates': 'AED',
+    'Egypt': 'EGP',
+    'Jordan': 'JOD',
+    'Qatar': 'QAR',
+    'Kuwait': 'KWD',
+    'Bahrain': 'BHD',
+    'Oman': 'OMR',
+    'Iraq': 'IQD',
+    'Syria': 'SYP',
+    'Lebanon': 'LBP',
+    'Sudan': 'SDG',
+    'Libya': 'LYD',
+    'Morocco': 'MAD',
+    'Algeria': 'DZD',
+    'Tunisia': 'TND',
+    // Southeast Asia
     'Indonesia': 'IDR',
     'Malaysia': 'MYR',
     'Philippines': 'PHP',
@@ -71,13 +135,16 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     'Singapore': 'SGD',
     'Cambodia': 'KHR',
     'Myanmar': 'MMK',
+    // South Asia
     'Bangladesh': 'BDT',
     'India': 'INR',
     'Pakistan': 'PKR',
+    // Africa
     'Nigeria': 'NGN',
     'Kenya': 'KES',
     'Tanzania': 'TZS',
     'South Africa': 'ZAR',
+    // Americas
     'Brazil': 'BRL',
   };
 
@@ -119,11 +186,12 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       await OnboardingService.setSetupCompleted();
 
       if (mounted) {
-        // Dashboard requires an active router connection (ShellRoute
-        // redirect checks service.isConnected). After setup the user
-        // has only saved app preferences (country/currency/company),
-        // so send them to login to connect to a router first.
-        context.go('/login');
+        // After setup, decide where to go based on connection state.
+        // - If already connected (e.g. arrived here via Welcome's quick
+        //   login), go straight to the dashboard.
+        // - Otherwise, send the user to login to establish a connection.
+        final isConnected = ref.read(routerOSServiceProvider).isConnected;
+        context.go(isConnected ? '/main/dashboard' : '/login');
       }
     } catch (e) {
       if (mounted) {
@@ -142,9 +210,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   }
 
   void _skipSetup() {
-    // Skipping setup still requires a router connection before the
-    // dashboard can be shown (ShellRoute redirect). Go to login.
-    context.go('/login');
+    // Same logic as _saveAndContinue: respect current connection state.
+    final isConnected = ref.read(routerOSServiceProvider).isConnected;
+    context.go(isConnected ? '/main/dashboard' : '/login');
   }
 
   @override

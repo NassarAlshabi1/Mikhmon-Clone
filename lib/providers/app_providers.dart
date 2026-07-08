@@ -40,6 +40,9 @@ import '../screens/activity_logs/activity_logs_screen.dart';
 import '../screens/feedback/feedback_screen.dart';
 import '../screens/main/main_shell_screen.dart';
 import '../screens/files/files_screen.dart';
+import '../screens/settings/pdf_templates_editor_screen.dart';
+import '../screens/tools/process_image_screen.dart';
+import '../screens/backup/backup_system_screen.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -493,7 +496,22 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'voucher_template_editor',
                 builder: (context, state) => const VoucherTemplateEditorScreen(),
               ),
+              GoRoute(
+                path: 'pdf-templates',
+                name: 'pdf_templates_editor',
+                builder: (context, state) => const PdfTemplatesEditorScreen(),
+              ),
             ],
+          ),
+          GoRoute(
+            path: '/main/tools/process-image',
+            name: 'process_image',
+            builder: (context, state) => const ProcessImageScreen(),
+          ),
+          GoRoute(
+            path: '/main/backup',
+            name: 'backup_system',
+            builder: (context, state) => const BackupSystemScreen(),
           ),
           GoRoute(
             path: '/main/revenue',

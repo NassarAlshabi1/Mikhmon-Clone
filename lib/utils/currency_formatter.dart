@@ -102,6 +102,108 @@ class CurrencyData {
         name: 'New Zealand Dollar',
         decimalDigits: 2,
         localeCode: 'en_NZ'),
+    'YER': CurrencyInfo(
+        code: 'YER',
+        symbol: 'ر.ي',
+        name: 'Yemeni Rial',
+        decimalDigits: 0,
+        localeCode: 'ar_YE'),
+    'SAR': CurrencyInfo(
+        code: 'SAR',
+        symbol: '﷼',
+        name: 'Saudi Riyal',
+        decimalDigits: 2,
+        localeCode: 'ar_SA'),
+    'AED': CurrencyInfo(
+        code: 'AED',
+        symbol: 'د.إ',
+        name: 'UAE Dirham',
+        decimalDigits: 2,
+        localeCode: 'ar_AE'),
+    'EGP': CurrencyInfo(
+        code: 'EGP',
+        symbol: 'ج.م',
+        name: 'Egyptian Pound',
+        decimalDigits: 2,
+        localeCode: 'ar_EG'),
+    'JOD': CurrencyInfo(
+        code: 'JOD',
+        symbol: 'د.ا',
+        name: 'Jordanian Dinar',
+        decimalDigits: 3,
+        localeCode: 'ar_JO'),
+    'QAR': CurrencyInfo(
+        code: 'QAR',
+        symbol: '﷼',
+        name: 'Qatari Riyal',
+        decimalDigits: 2,
+        localeCode: 'ar_QA'),
+    'KWD': CurrencyInfo(
+        code: 'KWD',
+        symbol: 'د.ك',
+        name: 'Kuwaiti Dinar',
+        decimalDigits: 3,
+        localeCode: 'ar_KW'),
+    'BHD': CurrencyInfo(
+        code: 'BHD',
+        symbol: 'د.ب',
+        name: 'Bahraini Dinar',
+        decimalDigits: 3,
+        localeCode: 'ar_BH'),
+    'OMR': CurrencyInfo(
+        code: 'OMR',
+        symbol: '﷼',
+        name: 'Omani Rial',
+        decimalDigits: 3,
+        localeCode: 'ar_OM'),
+    'IQD': CurrencyInfo(
+        code: 'IQD',
+        symbol: 'ع.د',
+        name: 'Iraqi Dinar',
+        decimalDigits: 0,
+        localeCode: 'ar_IQ'),
+    'SYP': CurrencyInfo(
+        code: 'SYP',
+        symbol: 'ل.س',
+        name: 'Syrian Pound',
+        decimalDigits: 0,
+        localeCode: 'ar_SY'),
+    'LBP': CurrencyInfo(
+        code: 'LBP',
+        symbol: 'ل.ل',
+        name: 'Lebanese Pound',
+        decimalDigits: 0,
+        localeCode: 'ar_LB'),
+    'SDG': CurrencyInfo(
+        code: 'SDG',
+        symbol: 'ج.س',
+        name: 'Sudanese Pound',
+        decimalDigits: 2,
+        localeCode: 'ar_SD'),
+    'LYD': CurrencyInfo(
+        code: 'LYD',
+        symbol: 'ل.د',
+        name: 'Libyan Dinar',
+        decimalDigits: 2,
+        localeCode: 'ar_LY'),
+    'MAD': CurrencyInfo(
+        code: 'MAD',
+        symbol: 'د.م',
+        name: 'Moroccan Dirham',
+        decimalDigits: 2,
+        localeCode: 'ar_MA'),
+    'DZD': CurrencyInfo(
+        code: 'DZD',
+        symbol: 'د.ج',
+        name: 'Algerian Dinar',
+        decimalDigits: 2,
+        localeCode: 'ar_DZ'),
+    'TND': CurrencyInfo(
+        code: 'TND',
+        symbol: 'د.ت',
+        name: 'Tunisian Dinar',
+        decimalDigits: 3,
+        localeCode: 'ar_TN'),
   };
 
   static CurrencyInfo getCurrencyForLocale(String languageCode,
@@ -124,6 +226,10 @@ class CurrencyData {
         return currencies['CNY']!;
       case 'hi':
         return currencies['INR']!;
+      case 'ar':
+        // Arabic locale: default to Yemeni Rial (app's primary market).
+        // Country-specific overrides can be added here if needed.
+        return currencies['YER']!;
       case 'de':
         return currencies['EUR']!;
       case 'fr':
