@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../theme/app_theme.dart';
+import '../../../navigation/app_router.dart';
 
 /// A quick action item
 class QuickActionItem {
@@ -115,6 +116,24 @@ class QuickActionsGrid extends StatelessWidget {
         label: 'Files',
         color: const Color(0xFF3B82F6), // Blue
         onTap: () => context.go('/main/files'),
+      ),
+      QuickActionItem(
+        icon: Icons.description_outlined,
+        label: 'PDF Templates',
+        color: const Color(0xFF8B5CF6), // Violet
+        onTap: () => context.push(AppRouter.pdfTemplatesEditorRoute),
+      ),
+      QuickActionItem(
+        icon: Icons.document_scanner_outlined,
+        label: 'OCR',
+        color: const Color(0xFF10B981), // Emerald
+        onTap: () => context.push(AppRouter.processImageRoute),
+      ),
+      QuickActionItem(
+        icon: Icons.backup_outlined,
+        label: 'Backup',
+        color: const Color(0xFF06B6D4), // Cyan
+        onTap: () => context.push(AppRouter.backupSystemRoute),
       ),
     ];
   }

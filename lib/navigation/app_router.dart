@@ -9,6 +9,9 @@ import '../screens/hotspot_users/user_profiles_screen.dart';
 import '../screens/hotspot_users/hotspot_hosts_screen.dart';
 import '../screens/hotspot_users/hotspot_host_detail_screen.dart';
 import '../screens/hotspot_users/dhcp_leases_screen.dart';
+import '../screens/settings/pdf_templates_editor_screen.dart';
+import '../screens/tools/process_image_screen.dart';
+import '../screens/backup/backup_system_screen.dart';
 import '../services/models.dart';
 
 class AppRouter {
@@ -22,6 +25,9 @@ class AppRouter {
   static const String settingsRoute = '/settings';
   static const String hostDetailRoute = '/hosts/:id';
   static const String filesRoute = '/files';
+  static const String pdfTemplatesEditorRoute = '/settings/pdf-templates';
+  static const String processImageRoute = '/tools/process-image';
+  static const String backupSystemRoute = '/backup';
 
   static final router = GoRouter(
     initialLocation: initialRoute,
@@ -76,6 +82,21 @@ class AppRouter {
         path: filesRoute,
         pageBuilder: (context, state) =>
             const MaterialPage(child: FilesScreen()),
+      ),
+      GoRoute(
+        path: pdfTemplatesEditorRoute,
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: PdfTemplatesEditorScreen()),
+      ),
+      GoRoute(
+        path: processImageRoute,
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: ProcessImageScreen()),
+      ),
+      GoRoute(
+        path: backupSystemRoute,
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: BackupSystemScreen()),
       ),
     ],
   );

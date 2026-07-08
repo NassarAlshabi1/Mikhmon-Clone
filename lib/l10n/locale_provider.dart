@@ -13,18 +13,21 @@ class LocaleService {
 
   static const supportedLocales = [
     Locale('en', ''), // English
+    Locale('ar', ''), // العربية
     Locale('id', ''), // Indonesian
     Locale('ms', ''), // Malay
   ];
 
   static const localeNames = {
     'en': 'English',
+    'ar': 'العربية',
     'id': 'Bahasa Indonesia',
     'ms': 'Bahasa Melayu',
   };
 
   static const localeFlags = {
     'en': '🇺🇸',
+    'ar': '🇸🇦',
     'id': '🇮🇩',
     'ms': '🇲🇾',
   };
@@ -39,6 +42,10 @@ class LocaleService {
     if (supportedLocales
         .any((l) => l.languageCode == systemLocale.languageCode)) {
       return Locale(systemLocale.languageCode);
+    }
+    // If device locale is Arabic variant (e.g. ar-SA), return Arabic
+    if (systemLocale.languageCode == 'ar') {
+      return const Locale('ar');
     }
     return const Locale('en');
   }

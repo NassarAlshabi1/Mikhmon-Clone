@@ -78,6 +78,15 @@ class OmmonApp extends ConsumerWidget {
       localeResolutionCallback: (deviceLocale, supportedLocales) {
         return locale;
       },
+      builder: (context, child) {
+        // Force RTL layout for Arabic
+        return Directionality(
+          textDirection: locale.languageCode == 'ar'
+              ? TextDirection.rtl
+              : TextDirection.ltr,
+          child: child!,
+        );
+      },
     );
   }
 }

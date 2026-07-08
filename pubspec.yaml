@@ -47,7 +47,12 @@ dependencies:
   # Printing support
   printing: ^5.13.0
   print_bluetooth_thermal: ^1.1.9
-  google_mobile_ads: ^8.0.0
+  google_mobile_ads: ^7.0.0
+  # ── OCR + Camera (Process Image) ──
+  google_mlkit_text_recognition: ^0.14.0
+  image_picker: ^1.1.2
+  # ── Syncfusion PDF for advanced template editing ──
+  syncfusion_flutter_pdf: ^33.2.13
 
 dev_dependencies:
   flutter_test:

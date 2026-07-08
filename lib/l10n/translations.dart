@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ar_translations.dart';
 
 class AppStrings {
   Locale locale;
@@ -12,7 +13,8 @@ class AppStrings {
     }
     // Fallback for uninitialized locale - use device locale or default to English
     final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
-    if (deviceLocale.languageCode == 'id' ||
+    if (deviceLocale.languageCode == 'ar' ||
+        deviceLocale.languageCode == 'id' ||
         deviceLocale.languageCode == 'ms') {
       return AppStrings(deviceLocale);
     }
@@ -22,6 +24,18 @@ class AppStrings {
   String get languageCode => locale.languageCode;
 
   String _get(Map<String, String> map) {
+    // Arabic: check the map first, then fall back to the Arabic overlay
+    if (locale.languageCode == 'ar') {
+      final ar = map['ar'];
+      if (ar != null) return ar;
+      // Look up the English text in the Arabic overlay
+      final enText = map['en'];
+      if (enText != null) {
+        final overlay = arTranslations[enText];
+        if (overlay != null) return overlay;
+      }
+      return enText ?? '';
+    }
     return map[locale.languageCode] ?? map['en'] ?? '';
   }
 
@@ -1417,5 +1431,211 @@ class AppStrings {
         'en': 'Tap to collapse',
         'id': 'Ketuk untuk meruntuhkan',
         'ms': 'Ketuk untuk runtuhkan'
+      });
+
+  // ─── PDF Templates Editor ───
+  String get pdfTemplatesEditor => _get({
+        'en': 'PDF Templates Editor',
+        'id': 'Editor Template PDF',
+        'ms': 'Editor Templat PDF'
+      });
+  String get templateName => _get({
+        'en': 'Template Name',
+        'id': 'Nama Template',
+        'ms': 'Nama Templat'
+      });
+  String get templateType => _get({
+        'en': 'Template Type',
+        'id': 'Jenis Template',
+        'ms': 'Jenis Templat'
+      });
+  String get fullSize => _get({
+        'en': 'Full Size',
+        'id': 'Ukuran Penuh',
+        'ms': 'Saiz Penuh'
+      });
+  String get compact => _get({
+        'en': 'Compact',
+        'id': 'Kompak',
+        'ms': 'Padat'
+      });
+  String get minimal => _get({
+        'en': 'Minimal',
+        'id': 'Minimal',
+        'ms': 'Minimum'
+      });
+  String get backgroundColor => _get({
+        'en': 'Background Color',
+        'id': 'Warna Latar',
+        'ms': 'Warna Latar Belakang'
+      });
+  String get textColor => _get({
+        'en': 'Text Color',
+        'id': 'Warna Teks',
+        'ms': 'Warna Teks'
+      });
+  String get showQrCode => _get({
+        'en': 'Show QR Code',
+        'id': 'Tampilkan Kode QR',
+        'ms': 'Tunjuk Kod QR'
+      });
+  String get showLogo => _get({
+        'en': 'Show Logo',
+        'id': 'Tampilkan Logo',
+        'ms': 'Tunjuk Logo'
+      });
+  String get showPrice => _get({
+        'en': 'Show Price',
+        'id': 'Tampilkan Harga',
+        'ms': 'Tunjuk Harga'
+      });
+  String get showValidity => _get({
+        'en': 'Show Validity',
+        'id': 'Tampilkan Validitas',
+        'ms': 'Tunjuk Sah'
+      });
+  String get showProfile => _get({
+        'en': 'Show Profile',
+        'id': 'Tampilkan Profil',
+        'ms': 'Tunjuk Profil'
+      });
+  String get addTemplate => _get({
+        'en': 'Add Template',
+        'id': 'Tambah Template',
+        'ms': 'Tambah Templat'
+      });
+  String get editTemplate => _get({
+        'en': 'Edit Template',
+        'id': 'Edit Template',
+        'ms': 'Edit Templat'
+      });
+  String get deleteTemplate => _get({
+        'en': 'Delete Template?',
+        'id': 'Hapus Template?',
+        'ms': 'Padam Templat?'
+      });
+  String get templateSaved => _get({
+        'en': 'Template saved',
+        'id': 'Template disimpan',
+        'ms': 'Templat disimpan'
+      });
+  String get templateDeleted => _get({
+        'en': 'Template deleted',
+        'id': 'Template dihapus',
+        'ms': 'Templat dipadam'
+      });
+  String get noTemplatesFound => _get({
+        'en': 'No templates found',
+        'id': 'Tidak ada template',
+        'ms': 'Tiada templat dijumpai'
+      });
+  String get setAsDefault => _get({
+        'en': 'Set as Default',
+        'id': 'Jadikan Default',
+        'ms': 'Tetapkan sebagai Lalai'
+      });
+  String get preview => _get({
+        'en': 'Preview',
+        'id': 'Pratinjau',
+        'ms': 'Pratonton'
+      });
+  String get saveTemplate => _get({
+        'en': 'Save Template',
+        'id': 'Simpan Template',
+        'ms': 'Simpan Templat'
+      });
+
+  // ─── Process Image (OCR) ───
+  String get processImageOcr => _get({
+        'en': 'Process Image (OCR)',
+        'id': 'Proses Gambar (OCR)',
+        'ms': 'Proses Imej (OCR)'
+      });
+  String get takePhoto => _get({
+        'en': 'Take Photo',
+        'id': 'Ambil Foto',
+        'ms': 'Ambil Gambar'
+      });
+  String get chooseFromGallery => _get({
+        'en': 'Choose from Gallery',
+        'id': 'Pilih dari Galeri',
+        'ms': 'Pilih dari Galeri'
+      });
+  String get recognizedText => _get({
+        'en': 'Recognized Text',
+        'id': 'Teks Dikenali',
+        'ms': 'Teks Dikenali'
+      });
+  String get noTextFoundInImage => _get({
+        'en': 'No text found in image',
+        'id': 'Tidak ada teks dalam gambar',
+        'ms': 'Tiada teks dijumpai dalam imej'
+      });
+  String get copyText => _get({
+        'en': 'Copy Text',
+        'id': 'Salin Teks',
+        'ms': 'Salin Teks'
+      });
+
+  // ─── Backup System ───
+  String get backupSystem => _get({
+        'en': 'Backup System',
+        'id': 'Sistem Backup',
+        'ms': 'Sistem Sandar'
+      });
+  String get createBackup => _get({
+        'en': 'Create Backup',
+        'id': 'Buat Backup',
+        'ms': 'Buat Sandar'
+      });
+  String get restoreBackup => _get({
+        'en': 'Restore Backup',
+        'id': 'Pulihkan Backup',
+        'ms': 'Pulihkan Sandar'
+      });
+  String get downloadBackup => _get({
+        'en': 'Download Backup',
+        'id': 'Unduh Backup',
+        'ms': 'Muat Turun Sandar'
+      });
+  String get backupCreatedSuccessfully => _get({
+        'en': 'Backup created successfully',
+        'id': 'Backup berhasil dibuat',
+        'ms': 'Sandar berjaya dibuat'
+      });
+  String get backupRestoredSuccessfully => _get({
+        'en': 'Backup restored successfully',
+        'id': 'Backup berhasil dipulihkan',
+        'ms': 'Sandar berjaya dipulihkan'
+      });
+  String get backupDeletedSuccessfully => _get({
+        'en': 'Backup deleted successfully',
+        'id': 'Backup berhasil dihapus',
+        'ms': 'Sandar berjaya dipadam'
+      });
+  String get noBackupsFound => _get({
+        'en': 'No backups found',
+        'id': 'Tidak ada backup',
+        'ms': 'Tiada sandar dijumpai'
+      });
+  String get backupName => _get({
+        'en': 'Backup Name',
+        'id': 'Nama Backup',
+        'ms': 'Nama Sandar'
+      });
+  String get restoreFromThisBackup => _get({
+        'en': 'Restore from this backup?',
+        'id': 'Pulihkan dari backup ini?',
+        'ms': 'Pulihkan dari sandar ini?'
+      });
+  String get thisWillOverwriteCurrentRouterConfiguration => _get({
+        'en': 'This will overwrite current router configuration.',
+        'id': 'Ini akan menimpa konfigurasi router saat ini.',
+        'ms': 'Ini akan menulis ganti konfigurasi router semasa.'
+      });
+  String get deleteBackup => _get({
+        'en': 'Delete Backup?',
+        'id': 'Hapus Backup?',
+        'ms': 'Padam Sandar?'
       });
 }
