@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_theme.dart';
 import '../../../providers/app_providers.dart';
@@ -31,10 +32,17 @@ class _TrafficMonitorCardState extends ConsumerState<TrafficMonitorCard> {
 
   void _startRefreshTimer() {
     _refreshTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (mounted) {
-        ref.read(interfaceTrafficProvider.notifier).silentRefresh();
-        setState(() {});
-      }
+      if (!mounted) return;
+      // Trigger silent refresh of traffic data; setState below causes the
+      // AsyncValue to be re-read and rebuilt with the latest values.
+      ref.read(interfaceTrafficProvider.notifier).silentRefresh();
+      // Use a microtask to ensure setState runs after the current frame
+      // callback queue is drained, avoiding rebuild-during-build errors.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
     });
   }
 

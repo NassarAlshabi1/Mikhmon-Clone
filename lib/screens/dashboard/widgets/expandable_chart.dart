@@ -86,9 +86,12 @@ class _ExpandableResourceChartState extends State<ExpandableResourceChart> {
     for (final point in dataPoints) {
       if (point.timestamp.isBefore(cutoff)) continue;
       final x = point.timestamp.difference(cutoff).inSeconds.toDouble();
-      _cpuSpots.add(FlSpot(x, point.cpuLoad));
-      _memorySpots.add(FlSpot(x, point.memoryUsage));
-      _diskSpots.add(FlSpot(x, point.diskUsage));
+      // Clamp values to the [0, 100] range to prevent fl_chart from
+      // throwing when RouterOS reports NaN/-1 for a field (which can
+      // happen briefly right after reconnect).
+      _cpuSpots.add(FlSpot(x, point.cpuLoad.clamp(0, 100)));
+      _memorySpots.add(FlSpot(x, point.memoryUsage.clamp(0, 100)));
+      _diskSpots.add(FlSpot(x, point.diskUsage.clamp(0, 100)));
     }
   }
 
@@ -400,9 +403,10 @@ class _FullScreenChartState extends State<_FullScreenChart> {
     for (final point in dataPoints) {
       if (point.timestamp.isBefore(cutoff)) continue;
       final x = point.timestamp.difference(cutoff).inSeconds.toDouble();
-      _cpuSpots.add(FlSpot(x, point.cpuLoad));
-      _memorySpots.add(FlSpot(x, point.memoryUsage));
-      _diskSpots.add(FlSpot(x, point.diskUsage));
+      // Clamp values to the [0, 100] range (same reason as the inline chart).
+      _cpuSpots.add(FlSpot(x, point.cpuLoad.clamp(0, 100)));
+      _memorySpots.add(FlSpot(x, point.memoryUsage.clamp(0, 100)));
+      _diskSpots.add(FlSpot(x, point.diskUsage.clamp(0, 100)));
     }
   }
 

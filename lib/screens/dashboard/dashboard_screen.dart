@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -424,7 +425,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // At a Glance summary (High priority) - THIRD
                 if (_highPriorityLoaded) ...[
                   const AtAGlanceCard(),
-                  const NativeAdWidget(),
+                  // NativeAdWidget only renders on Android/iOS; on other
+                  // platforms it would throw UnsupportedError during init.
+                  // Wrapped in a platform guard so the dashboard still loads
+                  // on desktop/web builds.
+                  if (defaultTargetPlatform == TargetPlatform.android ||
+                      defaultTargetPlatform == TargetPlatform.iOS)
+                    const NativeAdWidget(),
                 ] else
                   SkeletonLoaders.card(height: 100),
                 SizedBox(height: isSmallScreen ? 12 : 16),
@@ -442,7 +449,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   SkeletonLoaders.card(height: 150),
                 // Quick actions grid (Medium priority)
                 if (_mediumPriorityLoaded)
-                  const QuickActionsGrid()
+                  const QuickActionsGrid(
+                      key: ValueKey('dashboard_quick_actions'))
                 else
                   SkeletonLoaders.card(height: 200),
               ],
@@ -710,6 +718,11 @@ class _UserSearchDelegate extends SearchDelegate<String> {
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];
+            // Defensive: username could be empty, which would make
+            // substring(0, 1) throw a RangeError.
+            final initial = user.name.isNotEmpty
+                ? user.name.substring(0, 1).toUpperCase()
+                : '?';
             return ListTile(
               leading: CircleAvatar(
                 backgroundColor: Theme.of(context)
@@ -717,7 +730,7 @@ class _UserSearchDelegate extends SearchDelegate<String> {
                     .primary
                     .withValues(alpha: 0.1),
                 child: Text(
-                  user.name.substring(0, 1).toUpperCase(),
+                  initial,
                   style:
                       TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
