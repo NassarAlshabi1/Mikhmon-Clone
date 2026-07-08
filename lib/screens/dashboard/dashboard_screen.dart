@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +12,6 @@ import 'widgets/traffic_monitor_widgets.dart';
 import 'widgets/at_a_glance_card.dart';
 import 'widgets/system_alerts_card.dart';
 import 'widgets/quick_actions_grid.dart';
-import '../../widgets/native_ad_widget.dart';
 import '../../l10n/translations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -425,13 +423,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // At a Glance summary (High priority) - THIRD
                 if (_highPriorityLoaded) ...[
                   const AtAGlanceCard(),
-                  // NativeAdWidget only renders on Android/iOS; on other
-                  // platforms it would throw UnsupportedError during init.
-                  // Wrapped in a platform guard so the dashboard still loads
-                  // on desktop/web builds.
-                  if (defaultTargetPlatform == TargetPlatform.android ||
-                      defaultTargetPlatform == TargetPlatform.iOS)
-                    const NativeAdWidget(),
                 ] else
                   SkeletonLoaders.card(height: 100),
                 SizedBox(height: isSmallScreen ? 12 : 16),
@@ -453,10 +444,119 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       key: ValueKey('dashboard_quick_actions'))
                 else
                   SkeletonLoaders.card(height: 200),
+                SizedBox(height: isSmallScreen ? 12 : 16),
+                // Advanced tools shortcuts (Templates, Saved cards, Qahtani)
+                if (_mediumPriorityLoaded) _buildAdvancedToolsSection(),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// قسم "أدوات متقدمة" — اختصارات للشاشات الجديدة:
+  /// قوالب PDF، ملفات الكروت المحفوظة، ربط الشبكة بـ م/نصار الشعبي.
+  Widget _buildAdvancedToolsSection() {
+    return Card(
+      color: context.appSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.build_circle_rounded,
+                    color: context.appPrimary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'أدوات متقدمة',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: context.appOnSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.description_outlined,
+                    label: 'قوالب PDF',
+                    color: const Color(0xFF8B5CF6),
+                    onTap: () => context.push('/main/templates/pdf'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.folder_special_outlined,
+                    label: 'ملفات الكروت',
+                    color: const Color(0xFF06B6D4),
+                    onTap: () => context.push('/main/cards/saved'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.link_rounded,
+                    label: 'ربط القحطاني',
+                    color: const Color(0xFF10B981),
+                    onTap: () => context.push('/main/qahtani-link'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolShortcut({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.appOnSurface,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

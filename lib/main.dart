@@ -10,7 +10,6 @@ import 'services/search_service.dart';
 import 'services/theme_service.dart';
 import 'l10n/locale_provider.dart';
 import 'l10n/app_localizations_delegate.dart';
-import 'services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +25,6 @@ void main() async {
 
   // Initialize search service for recent searches
   await SearchService.init();
-
-  // Initialize mobile ads
-  await AdService().init();
 
   // Pre-load theme for instant display (no flash)
   final preloadedTheme = await ThemeService.loadThemeMode();
