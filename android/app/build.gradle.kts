@@ -39,22 +39,30 @@ android {
         versionName = flutter.versionName
     }
 
+    val hasReleaseKeystore = keystoreProperties.getProperty("storeFile") != null
+
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            storePassword = keystoreProperties.getProperty("storePassword")
-            val keystoreFile = keystoreProperties.getProperty("storeFile")
-            if (keystoreFile != null) {
-                storeFile = file(keystoreFile)
+            if (hasReleaseKeystore) {
+                storeFile = file(keystoreProperties.getProperty("storeFile")!!)
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
     }
 
     buildTypes {
         release {
-            // Signing with the release keys
-            signingConfig = signingConfigs.getByName("release")
+            // Use the release keystore when present (local signed builds),
+            // otherwise fall back to the debug signing config so the release
+            // packaging task still has a valid storeFile and can produce an
+            // installable APK for QA/testing in CI.
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
 
             // Enable code shrinking and obfuscation
             isMinifyEnabled = true
