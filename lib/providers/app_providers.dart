@@ -103,7 +103,7 @@ final currencyProvider =
 });
 
 class CurrencyNotifier extends StateNotifier<CurrencyInfo> {
-  CurrencyNotifier() : super(CurrencyData.currencies['USD']!) {
+  CurrencyNotifier() : super(CurrencyData.yer) {
     _loadCurrency();
   }
 

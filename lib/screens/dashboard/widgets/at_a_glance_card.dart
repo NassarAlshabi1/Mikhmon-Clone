@@ -16,7 +16,7 @@ class AtAGlanceCard extends ConsumerWidget {
     
     final cache = ref.read(cacheServiceProvider);
     final settings = cache.getAppSettings();
-    final currencyCode = settings?['currency'] as String? ?? 'USD';
+    final currencyCode = settings?['currency'] as String? ?? 'YER';
 
     return Card(
       color: context.appSurface,

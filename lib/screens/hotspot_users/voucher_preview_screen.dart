@@ -290,8 +290,8 @@ class _VoucherPreviewScreenState extends ConsumerState<VoucherPreviewScreen> {
       final settings = cache.getAppSettings();
       final companyName = settings?['companyName'] as String? ?? 'WiFi';
       final loginUrl = settings?['loginUrl'] as String? ?? 'http://wifi.local';
-      final currency = settings?['currency'] as String? ?? 'USD';
-      final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? '\$';
+      final currency = settings?['currency'] as String? ?? 'YER';
+      final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? 'ر.ي';
 
       final template = ref.read(voucherTemplateProvider);
       await VoucherPrinter.printBulkVouchers(

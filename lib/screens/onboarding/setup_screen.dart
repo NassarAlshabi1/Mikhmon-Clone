@@ -16,137 +16,14 @@ class SetupScreen extends ConsumerStatefulWidget {
 
 class _SetupScreenState extends ConsumerState<SetupScreen> {
   final _companyController = TextEditingController();
-  // Yemen is the default country and YER is the default currency.
-  String? _selectedCountry = 'Yemen';
-  String? _selectedCurrency = 'YER';
+  // The app is targeted exclusively at the Yemeni market.
+  // Country and currency are fixed and not user-selectable.
+  static const String _selectedCountry = 'Yemen';
+  static const String _selectedCurrency = 'YER';
   bool _saving = false;
 
-  static const _countries = [
-    // Arabic countries (default region)
-    'Yemen',
-    'Saudi Arabia',
-    'United Arab Emirates',
-    'Egypt',
-    'Jordan',
-    'Qatar',
-    'Kuwait',
-    'Bahrain',
-    'Oman',
-    'Iraq',
-    'Syria',
-    'Lebanon',
-    'Sudan',
-    'Libya',
-    'Morocco',
-    'Algeria',
-    'Tunisia',
-    // Southeast Asia
-    'Indonesia',
-    'Malaysia',
-    'Philippines',
-    'Thailand',
-    'Vietnam',
-    'Singapore',
-    'Cambodia',
-    'Myanmar',
-    'Laos',
-    // South Asia
-    'Bangladesh',
-    'India',
-    'Pakistan',
-    // Africa
-    'Nigeria',
-    'Kenya',
-    'Tanzania',
-    'South Africa',
-    // Americas
-    'Brazil',
-    'Other',
-  ];
-
-  static const _currencies = {
-    // Arabic currencies
-    'YER': 'Yemeni Rial (ر.ي)',
-    'SAR': 'Saudi Riyal (﷼)',
-    'AED': 'UAE Dirham (د.إ)',
-    'EGP': 'Egyptian Pound (ج.م)',
-    'JOD': 'Jordanian Dinar (د.ا)',
-    'QAR': 'Qatari Riyal (﷼)',
-    'KWD': 'Kuwaiti Dinar (د.ك)',
-    'BHD': 'Bahraini Dinar (د.ب)',
-    'OMR': 'Omani Rial (﷼)',
-    'IQD': 'Iraqi Dinar (ع.د)',
-    'SYP': 'Syrian Pound (ل.س)',
-    'LBP': 'Lebanese Pound (ل.ل)',
-    'SDG': 'Sudanese Pound (ج.س)',
-    'LYD': 'Libyan Dinar (ل.د)',
-    'MAD': 'Moroccan Dirham (د.م)',
-    'DZD': 'Algerian Dinar (د.ج)',
-    'TND': 'Tunisian Dinar (د.ت)',
-    // Southeast Asian currencies
-    'IDR': 'Indonesian Rupiah (Rp)',
-    'MYR': 'Malaysian Ringgit (RM)',
-    'PHP': 'Philippine Peso (₱)',
-    'THB': 'Thai Baht (฿)',
-    'VND': 'Vietnamese Dong (₫)',
-    'SGD': 'Singapore Dollar (S\$)',
-    'KHR': 'Cambodian Riel (៛)',
-    'MMK': 'Myanmar Kyat (K)',
-    // South Asian currencies
-    'BDT': 'Bangladeshi Taka (৳)',
-    'INR': 'Indian Rupee (₹)',
-    'PKR': 'Pakistani Rupee (₨)',
-    // African currencies
-    'NGN': 'Nigerian Naira (₦)',
-    'KES': 'Kenyan Shilling (KSh)',
-    'TZS': 'Tanzanian Shilling (TSh)',
-    'ZAR': 'South African Rand (R)',
-    // Americas
-    'BRL': 'Brazilian Real (R\$)',
-    'USD': 'US Dollar (\$)',
-  };
-
-  // Auto-select currency based on country
-  static const _countryCurrencyMap = {
-    // Arabic countries
-    'Yemen': 'YER',
-    'Saudi Arabia': 'SAR',
-    'United Arab Emirates': 'AED',
-    'Egypt': 'EGP',
-    'Jordan': 'JOD',
-    'Qatar': 'QAR',
-    'Kuwait': 'KWD',
-    'Bahrain': 'BHD',
-    'Oman': 'OMR',
-    'Iraq': 'IQD',
-    'Syria': 'SYP',
-    'Lebanon': 'LBP',
-    'Sudan': 'SDG',
-    'Libya': 'LYD',
-    'Morocco': 'MAD',
-    'Algeria': 'DZD',
-    'Tunisia': 'TND',
-    // Southeast Asia
-    'Indonesia': 'IDR',
-    'Malaysia': 'MYR',
-    'Philippines': 'PHP',
-    'Thailand': 'THB',
-    'Vietnam': 'VND',
-    'Singapore': 'SGD',
-    'Cambodia': 'KHR',
-    'Myanmar': 'MMK',
-    // South Asia
-    'Bangladesh': 'BDT',
-    'India': 'INR',
-    'Pakistan': 'PKR',
-    // Africa
-    'Nigeria': 'NGN',
-    'Kenya': 'KES',
-    'Tanzania': 'TZS',
-    'South Africa': 'ZAR',
-    // Americas
-    'Brazil': 'BRL',
-  };
+  // Display label for the fixed currency.
+  static const _currencyLabel = 'Yemeni Rial (ر.ي)';
 
   @override
   void dispose() {
@@ -154,33 +31,16 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     super.dispose();
   }
 
-  void _onCountryChanged(String? country) {
-    setState(() {
-      _selectedCountry = country;
-      // Auto-select currency
-      if (country != null && _countryCurrencyMap.containsKey(country)) {
-        _selectedCurrency = _countryCurrencyMap[country];
-      }
-    });
-  }
-
   Future<void> _saveAndContinue() async {
-    if (_selectedCountry == null || _selectedCurrency == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text(AppStrings.of(context).pleaseSelectCountryAndCurrency)),
-      );
-      return;
-    }
+    // Country and currency are constants, so no validation needed.
 
     setState(() => _saving = true);
 
     try {
       final cache = ref.read(cacheServiceProvider);
       await cache.saveAppSettings(
-        country: _selectedCountry!,
-        currency: _selectedCurrency!,
+        country: _selectedCountry,
+        currency: _selectedCurrency,
         companyName: _companyController.text.trim(),
       );
       await OnboardingService.setSetupCompleted();
@@ -271,19 +131,18 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Country
+              // Country (fixed — Yemen only)
               _buildLabel(AppStrings.of(context).country),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedCountry,
-                items: _countries.map((c) {
-                  return DropdownMenuItem(value: c, child: Text(c));
-                }).toList(),
-                onChanged: _onCountryChanged,
+              TextField(
+                readOnly: true,
+                controller: TextEditingController(text: _selectedCountry),
                 decoration: InputDecoration(
-                  hintText: AppStrings.of(context).selectYourCountry,
                   prefixIcon:
                       Icon(Icons.public_rounded, color: context.appPrimary),
+                  suffixIcon: Icon(Icons.lock_outline_rounded,
+                      size: 18,
+                      color: context.appOnSurface.withValues(alpha: 0.4)),
                   filled: true,
                   fillColor: context.appSurface,
                   border: OutlineInputBorder(
@@ -300,32 +159,27 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: context.appPrimary, width: 2),
+                    borderSide: BorderSide(
+                        color: context.appOnSurface.withValues(alpha: 0.1),
+                        width: 1),
                   ),
                 ),
-                dropdownColor: context.appSurface,
                 style: TextStyle(color: context.appOnSurface),
               ),
               const SizedBox(height: 20),
 
-              // Currency
+              // Currency (fixed — Yemeni Rial only)
               _buildLabel(AppStrings.of(context).currency),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedCurrency,
-                items: _currencies.entries.map((e) {
-                  return DropdownMenuItem(
-                    value: e.key,
-                    child: Text(e.value),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => _selectedCurrency = value);
-                },
+              TextField(
+                readOnly: true,
+                controller: TextEditingController(text: _currencyLabel),
                 decoration: InputDecoration(
-                  hintText: AppStrings.of(context).selectYourCurrency,
                   prefixIcon: Icon(Icons.attach_money_rounded,
                       color: context.appPrimary),
+                  suffixIcon: Icon(Icons.lock_outline_rounded,
+                      size: 18,
+                      color: context.appOnSurface.withValues(alpha: 0.4)),
                   filled: true,
                   fillColor: context.appSurface,
                   border: OutlineInputBorder(
@@ -342,10 +196,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: context.appPrimary, width: 2),
+                    borderSide: BorderSide(
+                        color: context.appOnSurface.withValues(alpha: 0.1),
+                        width: 1),
                   ),
                 ),
-                dropdownColor: context.appSurface,
                 style: TextStyle(color: context.appOnSurface),
               ),
               const SizedBox(height: 20),

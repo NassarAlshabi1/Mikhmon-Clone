@@ -311,7 +311,7 @@ String _formatPrice(double? price, {String? profileName}) {
       final localPrice = localPrices[profileName];
       if (localPrice != null && localPrice > 0) {
         final settings = cache.getAppSettings();
-        final currencyCode = settings?['currency'] as String? ?? 'USD';
+        final currencyCode = settings?['currency'] as String? ?? 'YER';
         final currencyInfo = CurrencyData.fromCode(currencyCode);
         return CurrencyFormatter.format(localPrice, currencyInfo);
       }
@@ -320,7 +320,7 @@ String _formatPrice(double? price, {String? profileName}) {
   }
   final cache = CacheService();
   final settings = cache.getAppSettings();
-  final currencyCode = settings?['currency'] as String? ?? 'USD';
+  final currencyCode = settings?['currency'] as String? ?? 'YER';
   final currencyInfo = CurrencyData.fromCode(currencyCode);
   return CurrencyFormatter.format(price, currencyInfo);
 }

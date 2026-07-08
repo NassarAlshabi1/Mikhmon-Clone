@@ -167,8 +167,8 @@ class _VouchersListScreenState extends ConsumerState<VouchersListScreen> {
     final settings = cache.getAppSettings();
     final companyName = settings?['companyName'] as String? ?? 'WiFi';
     final loginUrl = settings?['loginUrl'] as String? ?? 'http://wifi.local';
-    final currency = settings?['currency'] as String? ?? 'USD';
-    final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? '\$';
+    final currency = settings?['currency'] as String? ?? 'YER';
+    final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? 'ر.ي';
 
     await VoucherPrinter.printBulkVouchers(
       context,

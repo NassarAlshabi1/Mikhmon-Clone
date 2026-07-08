@@ -1223,7 +1223,7 @@ class _TransactionCard extends ConsumerWidget {
 String formatCurrency(WidgetRef ref, double value) {
   final cache = ref.read(cacheServiceProvider);
   final settings = cache.getAppSettings();
-  final currencyCode = settings?['currency'] as String? ?? 'USD';
+  final currencyCode = settings?['currency'] as String? ?? 'YER';
   final currencyInfo = CurrencyData.fromCode(currencyCode);
   return CurrencyFormatter.format(value, currencyInfo);
 }

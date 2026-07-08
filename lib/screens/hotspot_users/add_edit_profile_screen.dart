@@ -290,8 +290,8 @@ class _AddEditProfileScreenState extends ConsumerState<AddEditProfileScreen> {
   Widget _buildPriceField() {
     final cache = CacheService();
     final settings = cache.getAppSettings();
-    final currency = settings?['currency'] as String? ?? 'USD';
-    final symbol = CurrencyData.currencies[currency]?.symbol ?? '\$';
+    final currency = settings?['currency'] as String? ?? 'YER';
+    final symbol = CurrencyData.currencies[currency]?.symbol ?? 'ر.ي';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

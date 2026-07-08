@@ -409,8 +409,8 @@ class _VoucherDetailScreenState extends ConsumerState<VoucherDetailScreen> {
     final settings = cache.getAppSettings();
     final companyName = settings?['companyName'] as String? ?? 'WiFi';
     final loginUrl = settings?['loginUrl'] as String? ?? 'http://wifi.local';
-    final currency = settings?['currency'] as String? ?? 'USD';
-    final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? '\$';
+    final currency = settings?['currency'] as String? ?? 'YER';
+    final currencySymbol = CurrencyData.currencies[currency]?.symbol ?? 'ر.ي';
 
     VoucherPrinter.printVoucher(
       context,
@@ -458,8 +458,8 @@ class _VoucherDetailScreenState extends ConsumerState<VoucherDetailScreen> {
 
     final cache = CacheService();
     final settings = cache.getAppSettings();
-    final currencyStr = settings?['currency'] as String? ?? 'USD';
-    final currency = CurrencyData.currencies[currencyStr] ?? CurrencyData.currencies['USD']!;
+    final currencyStr = settings?['currency'] as String? ?? 'YER';
+    final currency = CurrencyData.currencies[currencyStr] ?? CurrencyData.yer;
 
     String priceStr = 'Free';
     if (widget.voucher.price != null) {

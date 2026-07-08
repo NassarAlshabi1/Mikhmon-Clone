@@ -468,26 +468,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showCountryDialog(
       BuildContext context, WidgetRef ref, CacheService cache) {
-    final countries = [
-      'Indonesia',
-      'Malaysia',
-      'Philippines',
-      'Thailand',
-      'Vietnam',
-      'Singapore',
-      'Cambodia',
-      'Myanmar',
-      'Laos',
-      'Bangladesh',
-      'India',
-      'Pakistan',
-      'Nigeria',
-      'Kenya',
-      'Tanzania',
-      'South Africa',
-      'Brazil',
-      'Other',
-    ];
+    // Only Yemen is supported.
+    final countries = ['Yemen'];
     showDialog(
       context: context,
       builder: (ctx) => SimpleDialog(
@@ -500,7 +482,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               final current = cache.getAppSettings() ?? {};
               await cache.saveAppSettings(
                 country: c,
-                currency: current['currency'] ?? 'USD',
+                currency: current['currency'] ?? 'YER',
                 companyName: current['companyName'] ?? '',
               );
               if (ctx.mounted) Navigator.pop(ctx);
@@ -572,7 +554,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           final current = cache.getAppSettings() ?? {};
           await cache.saveAppSettings(
             country: current['country'] ?? '',
-            currency: current['currency'] ?? 'USD',
+            currency: current['currency'] ?? 'YER',
             companyName: controller.text.trim(),
           );
           if (ctx.mounted) Navigator.pop(ctx);
@@ -595,7 +577,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           final current = cache.getAppSettings() ?? {};
           await cache.saveAppSettings(
             country: current['country'] ?? '',
-            currency: current['currency'] ?? 'USD',
+            currency: current['currency'] ?? 'YER',
             companyName: current['companyName'] ?? '',
             loginUrl: controller.text.trim(),
           );
