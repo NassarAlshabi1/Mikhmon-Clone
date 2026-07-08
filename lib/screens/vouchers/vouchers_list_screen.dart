@@ -16,7 +16,6 @@ import '../../widgets/skeleton_loader.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/back_to_top_fab.dart';
 import 'voucher_detail_screen.dart';
-import '../../providers/bulk_voucher_provider.dart';
 import '../../l10n/translations.dart';
 
 class VouchersListScreen extends ConsumerStatefulWidget {
@@ -181,22 +180,6 @@ class _VouchersListScreenState extends ConsumerState<VouchersListScreen> {
     );
   }
 
-void _openBulkActions(List<Voucher> vouchers) {
-    if (vouchers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No vouchers available')),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BulkActionsScreen(vouchers: vouchers),
-      ),
-    );
-  }
-
   void _toggleSelectionMode() {
     setState(() {
       _isSelectionMode = true;
@@ -313,16 +296,15 @@ void _openBulkActions(List<Voucher> vouchers) {
     // Show snackbar after dialog is closed
     await Future.delayed(const Duration(milliseconds: 200));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Deleted $successCount vouchers${failCount > 0 ? ' ($failCount failed)' : ''}'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: failCount > 0 ? Colors.orange : null,
-        ),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Deleted $successCount vouchers${failCount > 0 ? ' ($failCount failed)' : ''}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failCount > 0 ? Colors.orange : null,
+      ),
+    );
   }
 
   @override

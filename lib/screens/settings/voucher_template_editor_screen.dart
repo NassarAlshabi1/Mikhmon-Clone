@@ -486,7 +486,7 @@ class _VoucherTemplateEditorScreenState extends ConsumerState<VoucherTemplateEdi
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: context.appPrimary,
+            activeThumbColor: context.appPrimary,
           ),
         ],
       ),

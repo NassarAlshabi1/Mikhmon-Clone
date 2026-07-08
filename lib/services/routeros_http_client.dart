@@ -28,6 +28,7 @@ class RouterOSHttpClient implements MikrotikClient {
     required this.password,
   });
 
+  @override
   bool get isConnected => _isConnected;
 
   String get _baseUrl => 'http://$host:$port/rest';

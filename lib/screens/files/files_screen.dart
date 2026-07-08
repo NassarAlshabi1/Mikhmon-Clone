@@ -572,23 +572,22 @@ class _FilesScreenState extends ConsumerState<FilesScreen>
               Navigator.pop(context);
               final success =
                   await ref.read(routerFilesProvider.notifier).createBackup(controller.text);
-              if (mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Backup created: ${controller.text}'),
-                      backgroundColor: context.appSuccess,
-                    ),
-                  );
-                } else {
-                  final error = ref.read(routerFilesProvider).error;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(error ?? 'Failed to create backup'),
-                      backgroundColor: context.appError,
-                    ),
-                  );
-                }
+              if (!mounted) return;
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Backup created: ${controller.text}'),
+                    backgroundColor: context.appSuccess,
+                  ),
+                );
+              } else {
+                final error = ref.read(routerFilesProvider).error;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(error ?? 'Failed to create backup'),
+                    backgroundColor: context.appError,
+                  ),
+                );
               }
             },
             child: const Text('Create'),
@@ -659,23 +658,22 @@ class _FilesScreenState extends ConsumerState<FilesScreen>
               Navigator.pop(context);
               final success =
                   await ref.read(routerFilesProvider.notifier).exportConfig(controller.text);
-              if (mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Configuration exported: ${controller.text}'),
-                      backgroundColor: context.appSuccess,
-                    ),
-                  );
-                } else {
-                  final error = ref.read(routerFilesProvider).error;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(error ?? 'Failed to export configuration'),
-                      backgroundColor: context.appError,
-                    ),
-                  );
-                }
+              if (!mounted) return;
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Configuration exported: ${controller.text}'),
+                    backgroundColor: context.appSuccess,
+                  ),
+                );
+              } else {
+                final error = ref.read(routerFilesProvider).error;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(error ?? 'Failed to export configuration'),
+                    backgroundColor: context.appError,
+                  ),
+                );
               }
             },
             child: const Text('Export'),

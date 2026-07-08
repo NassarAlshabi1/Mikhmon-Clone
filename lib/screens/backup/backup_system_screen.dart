@@ -13,7 +13,6 @@
 import 'package:flutter/material.dart';
 import '../../services/backup_service.dart';
 import '../../l10n/app_strings.dart';
-import '../../l10n/translations.dart';
 
 class BackupSystemScreen extends StatefulWidget {
   const BackupSystemScreen({super.key});

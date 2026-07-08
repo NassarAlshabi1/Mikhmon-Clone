@@ -8,9 +8,9 @@ class OnLoginScriptGenerator {
     final minutes = parsed['minutes'] ?? 0;
 
     String interval = '';
-    if ((parsed['days'] ?? 0) > 0) interval += '${parsed['days']}d';
-    if ((parsed['hours'] ?? 0) > 0) interval += '${parsed['hours']}h';
-    if ((parsed['minutes'] ?? 0) > 0) interval += '${parsed['minutes']}m';
+    if (days > 0) interval += '${days}d';
+    if (hours > 0) interval += '${hours}h';
+    if (minutes > 0) interval += '${minutes}m';
     if (interval.isEmpty) interval = '1m';
 
     final priceTag = price != null ? '-${price.toInt()}' : '';
@@ -45,13 +45,15 @@ class OnLoginScriptGenerator {
     for (final match in RegExp(r'(\d+)([smhd])').allMatches(v)) {
       final val = int.tryParse(match.group(1) ?? '') ?? 0;
       final unit = match.group(2);
-      if (unit == 's')
+      if (unit == 's') {
         s += val;
-      else if (unit == 'm')
+      } else if (unit == 'm') {
         m += val;
-      else if (unit == 'h')
+      } else if (unit == 'h') {
         h += val;
-      else if (unit == 'd') d += val;
+      } else if (unit == 'd') {
+        d += val;
+      }
     }
 
     if (d == 0 && h == 0 && m == 0 && s == 0) return null;

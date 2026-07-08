@@ -48,7 +48,7 @@ class LogService {
     for (var i = 0; i < box.length; i++) {
       final data = box.getAt(i);
       if (data != null) {
-        logs.add(ActivityLog.fromJson(Map<String, dynamic>.from(data as Map)));
+        logs.add(ActivityLog.fromJson(Map<String, dynamic>.from(data)));
       }
     }
     // Sort by timestamp (newest first)
@@ -114,7 +114,7 @@ class LogService {
         for (var j = 0; j < box.length; j++) {
           final data = box.getAt(j);
           if (data != null) {
-            final log = ActivityLog.fromJson(Map<String, dynamic>.from(data as Map));
+            final log = ActivityLog.fromJson(Map<String, dynamic>.from(data));
             if (log.id == logs[i].id) {
               await box.deleteAt(j);
               break;

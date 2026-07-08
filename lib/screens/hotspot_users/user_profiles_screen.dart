@@ -277,19 +277,19 @@ class _UserProfilesScreenState extends ConsumerState<UserProfilesScreen>
               Navigator.pop(context);
               final messenger = ScaffoldMessenger.of(context);
               final primaryColor = context.appPrimary;
+              final snackBarText = AppStrings.of(context)
+                  .profileDeleted
+                  .replaceAll('%s', profile.name);
               await ref
                   .read(userProfileProvider.notifier)
                   .deleteProfile(profile.id);
-              if (mounted) {
-                messenger.showSnackBar(
-                  SnackBar(
-                    content: Text(AppStrings.of(context)
-                        .profileDeleted
-                        .replaceAll('%s', profile.name)),
-                    backgroundColor: primaryColor,
-                  ),
-                );
-              }
+              if (!mounted) return;
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(snackBarText),
+                  backgroundColor: primaryColor,
+                ),
+              );
             },
             style: TextButton.styleFrom(
               foregroundColor: context.appError,

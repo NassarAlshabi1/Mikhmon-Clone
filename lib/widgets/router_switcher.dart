@@ -180,6 +180,7 @@ class _RouterSwitcherState extends ConsumerState<RouterSwitcher> {
               ),
               onTap: () {
                 Future.delayed(Duration.zero, () {
+                  if (!mounted) return;
                   _showManageConnectionsDialog(context);
                 });
               },

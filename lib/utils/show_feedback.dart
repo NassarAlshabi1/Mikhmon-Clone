@@ -6,7 +6,7 @@ class FeedbackUtils {
     if (!context.mounted) return; // Safety check
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('✅ ${message}'),
+        content: Text('✅ $message'),
         backgroundColor: Colors.green[700],
         behavior: SnackBarBehavior.floating,
       ),

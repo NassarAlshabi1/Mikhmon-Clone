@@ -70,22 +70,20 @@ class BackupService {
   }
 
   /// الـ client الحالي للاتصال بـ MikroTik
-  RouterOSClient? _client;
-  RouterOSClient? get client => _client;
-  set client(RouterOSClient? c) => _client = c;
+  RouterOSClient? client;
 
   // ─── Create backup on router ───
 
   Future<BackupEntry> createBackup({String? name}) async {
     final backupName = name ?? 'backup_${DateTime.now().millisecondsSinceEpoch}';
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
 
     try {
-      await _client!.createBackup(backupName);
+      await client!.createBackup(backupName);
       await Future.delayed(const Duration(seconds: 2));
 
       // Fetch files to find the backup
-      final files = await _client!.getFiles();
+      final files = await client!.getFiles();
       final file = files.firstWhere(
         (f) => f['name']?.toString() == '$backupName.backup',
         orElse: () => <String, dynamic>{},
@@ -109,9 +107,9 @@ class BackupService {
   // ─── List backups on router ───
 
   Future<List<BackupEntry>> listRouterBackups() async {
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
     try {
-      final files = await _client!.getFiles();
+      final files = await client!.getFiles();
       return files
           .where((r) => (r['name']?.toString() ?? '').endsWith('.backup'))
           .map((r) => BackupEntry(
@@ -129,9 +127,9 @@ class BackupService {
   // ─── Download backup content ───
 
   Future<String> downloadBackup(String backupName) async {
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
     try {
-      final content = await _client!.downloadFile(backupName);
+      final content = await client!.downloadFile(backupName);
       // Save to local file
       final dir = await getApplicationDocumentsDirectory();
       final localPath = '${dir.path}/$backupName';
@@ -156,10 +154,10 @@ class BackupService {
   // ─── Restore backup on router ───
 
   Future<void> restoreBackup(String backupName) async {
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
     try {
       // RouterOS backup load command
-      await _client!.createBackup('restore_${DateTime.now().millisecondsSinceEpoch}');
+      await client!.createBackup('restore_${DateTime.now().millisecondsSinceEpoch}');
       // Note: actual restore requires /system/backup/load which is interactive
       // For now, we save the backup name and let user restore via Winbox
       throw BackupException(
@@ -172,17 +170,17 @@ class BackupService {
   // ─── Delete backup from router ───
 
   Future<void> deleteRouterBackup(String backupName) async {
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
     try {
       // Find the file id first
-      final files = await _client!.getFiles();
+      final files = await client!.getFiles();
       final file = files.firstWhere(
         (f) => f['name']?.toString() == backupName,
         orElse: () => <String, dynamic>{},
       );
       final id = file['.id']?.toString();
       if (id != null) {
-        await _client!.deleteFile(id);
+        await client!.deleteFile(id);
       }
     } catch (e) {
       throw BackupException('فشل حذف النسخة: $e');
@@ -222,11 +220,11 @@ class BackupService {
   // ─── Export config (text-based) ───
 
   Future<String> exportConfig({bool compact = false}) async {
-    if (_client == null) throw BackupException('غير متصل بالراوتر');
+    if (client == null) throw BackupException('غير متصل بالراوتر');
     try {
       final name = 'export_${DateTime.now().millisecondsSinceEpoch}.rsc';
-      await _client!.exportConfig(name);
-      final content = await _client!.downloadFile(name);
+      await client!.exportConfig(name);
+      final content = await client!.downloadFile(name);
       return content;
     } catch (e) {
       throw BackupException('فشل تصدير الإعدادات: $e');

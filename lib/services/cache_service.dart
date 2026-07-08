@@ -53,7 +53,9 @@ class CacheService {
       if (data != null && data is Map) {
         return Map<String, double>.from(data.map((key, value) => MapEntry(key.toString(), (value as num).toDouble())));
       }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore cache read errors and return empty map.
+    }
     return {};
   }
 
@@ -63,7 +65,9 @@ class CacheService {
       final map = getProfilePrices();
       map[profileName] = price;
       await _cacheBox.put(_profilePricesKey, map);
-    } catch (e) {}
+    } catch (e) {
+      // Ignore cache write errors.
+    }
   }
 
   /// Get system resources from cache
@@ -386,7 +390,7 @@ class CacheService {
     try {
       final data = _cacheBox.get(_vouchersKey);
       if (data != null && data is List) {
-        return (data as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        return (data).map((e) => Map<String, dynamic>.from(e as Map)).toList();
       }
       return null;
     } catch (e) {

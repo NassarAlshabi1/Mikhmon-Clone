@@ -115,8 +115,6 @@ class OcrService {
 
     final lines = text.split('\n');
     for (final line in lines) {
-      final lower = line.toLowerCase().trim();
-
       // Pattern: user: xxx / username: xxx / user = xxx
       final userMatch = RegExp(
         r'(?:user(?:name)?|name)\s*[:=]\s*(.+)',

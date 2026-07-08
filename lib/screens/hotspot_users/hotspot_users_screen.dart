@@ -606,16 +606,15 @@ class _HotspotUsersScreenState extends ConsumerState<HotspotUsersScreen>
     // Show snackbar after dialog is closed
     await Future.delayed(const Duration(milliseconds: 200));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Deleted $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: failCount > 0 ? Colors.orange : null,
-        ),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Deleted $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failCount > 0 ? Colors.orange : null,
+      ),
+    );
   }
 
   Future<void> _bulkDisableUsers() async {
@@ -683,16 +682,15 @@ class _HotspotUsersScreenState extends ConsumerState<HotspotUsersScreen>
     // Show snackbar after dialog is closed
     await Future.delayed(const Duration(milliseconds: 200));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Disabled $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: failCount > 0 ? Colors.orange : null,
-        ),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Disabled $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failCount > 0 ? Colors.orange : null,
+      ),
+    );
   }
 
   Future<void> _bulkEnableUsers() async {
@@ -760,16 +758,15 @@ class _HotspotUsersScreenState extends ConsumerState<HotspotUsersScreen>
     // Show snackbar after dialog is closed
     await Future.delayed(const Duration(milliseconds: 200));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Enabled $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: failCount > 0 ? Colors.orange : null,
-        ),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Enabled $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failCount > 0 ? Colors.orange : null,
+      ),
+    );
   }
 
   Future<void> _showMoveProfileDialog(BuildContext context) async {
@@ -946,16 +943,15 @@ class _HotspotUsersScreenState extends ConsumerState<HotspotUsersScreen>
     // Show snackbar after dialog is closed
     await Future.delayed(const Duration(milliseconds: 200));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Moved $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: failCount > 0 ? Colors.orange : null,
-        ),
-      );
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Moved $successCount users${failCount > 0 ? ' ($failCount failed)' : ''}'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: failCount > 0 ? Colors.orange : null,
+      ),
+    );
   }
 
   List<HotspotUser> _filterUsers(List<HotspotUser> users) {

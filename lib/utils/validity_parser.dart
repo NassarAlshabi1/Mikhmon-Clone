@@ -116,7 +116,7 @@ class ValidityParser {
     final dateStr = '${now.month}.${now.day}.${now.year.toString().substring(2)}';
     
     // Ensure validity is not empty string for the price part
-    final effectiveValidity = (validity == null || validity.isEmpty) ? "unlimited" : validity;
+    final effectiveValidity = (validity.isEmpty) ? "unlimited" : validity;
     
     final pricePart = price != null && price > 0 
         ? '$effectiveValidity/${price.toInt()}' 

@@ -139,6 +139,7 @@ class _AddHotspotUserScreenState extends ConsumerState<AddHotspotUserScreen> {
         context.pop(true); // Return true to indicate success
       }
     } catch (e) {
+      if (!mounted) return;
       FeedbackUtils.showError(
         context,
         AppStrings.of(context)

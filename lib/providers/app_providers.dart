@@ -789,7 +789,9 @@ class HotspotUsersNotifier extends AsyncNotifier<PaginatedUsers> {
         if (!commentLower.contains('mode:vc') &&
             !commentLower.contains('mode:up') &&
             !commentLower.startsWith('vc-') &&
-            !commentLower.startsWith('up-')) continue;
+            !commentLower.startsWith('up-')) {
+          continue;
+        }
 
         final price = profilePrices[profileName.toLowerCase()];
         if (price == null || price <= 0) continue;
@@ -1494,7 +1496,9 @@ class UserProfileNotifier extends AsyncNotifier<List<UserProfile>> {
             price: updatedProfile.price,
           );
         }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore script generation errors; onLoginScript stays null.
+    }
 
     // Format comment with price for Mikhmon compatibility
     final comment = updatedProfile.price != null 

@@ -32,6 +32,7 @@ class RouterOSClient implements MikrotikClient {
     required this.password,
   });
 
+  @override
   bool get isConnected => _isConnected;
 
   Future<void> _ensureConnected() async {

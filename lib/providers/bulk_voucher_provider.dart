@@ -780,18 +780,17 @@ class _BulkActionsScreenState extends ConsumerState<BulkActionsScreen> {
             onPressed: () async {
               Navigator.pop(context);
               await ref.read(bulkVoucherProvider.notifier).deleteSelected();
+              if (!mounted) return;
               final state = ref.read(bulkVoucherProvider);
 
-              if (mounted) {
-                if (state.successMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.successMessage!),
-                      backgroundColor: context.appSuccess,
-                    ),
-                  );
-                  Navigator.pop(context); // Go back after delete
-                }
+              if (state.successMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.successMessage!),
+                    backgroundColor: context.appSuccess,
+                  ),
+                );
+                Navigator.pop(context); // Go back after delete
               }
             },
             style: FilledButton.styleFrom(
