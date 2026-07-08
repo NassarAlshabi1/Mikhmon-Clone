@@ -514,6 +514,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            // صف ثانٍ: الميزات المتقدمة (تقارير، طرفية، طوبولوجيا)
+            Row(
+              children: [
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.assessment_outlined,
+                    label: 'التقارير الشهرية',
+                    color: const Color(0xFFEC4899),
+                    onTap: () => context.push('/main/reporting'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.terminal,
+                    label: 'الطرفية',
+                    color: const Color(0xFF0EA5E9),
+                    onTap: () => context.push('/main/terminal'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.account_tree_outlined,
+                    label: 'خريطة الشبكة',
+                    color: const Color(0xFF84CC16),
+                    onTap: () => context.push('/main/topology'),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

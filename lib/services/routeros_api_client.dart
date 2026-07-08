@@ -865,4 +865,53 @@ class RouterOSClient implements MikrotikClient {
     _currentItem = null;
     _log('Disconnected');
   }
+
+  // ─── Advanced: Terminal + Network Discovery ───
+
+  @override
+  Future<List<Map<String, dynamic>>> talk(String command,
+      {List<String>? args}) async {
+    try {
+      await _ensureConnected();
+      _writeWord(command);
+      if (args != null) {
+        for (final a in args) {
+          _writeWord(a);
+        }
+      }
+      _writeWord(''); // إنهاء الجملة
+      final response = await _readResponse();
+      return response;
+    } catch (e) {
+      _log('talk($command) failed: $e');
+      throw Exception('Failed to execute command "$command": $e');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getLldpNeighbors() async {
+    try {
+      // LLDP/CDP neighbor discovery (RouterOS v6+ path)
+      return await talk('/ip/neighbor/discovery/print');
+    } catch (_) {
+      // الإصدارات الأقدم تستخدم مساراً مختلفاً
+      try {
+        return await talk('/interface/ethernet/neighbor/print');
+      } catch (e) {
+        return [];
+      }
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getInterfaceDetails() async {
+    // /interface/print يعطي معلومات أساسية؛ نضيف detail=true للحصول على
+    // إحصائيات rx/tx bytes و MAC address و type.
+    try {
+      return await talk('/interface/print', args: ['detail=']);
+    } catch (e) {
+      // fallback للـ print البسيط
+      return await getInterfaceStats();
+    }
+  }
 }

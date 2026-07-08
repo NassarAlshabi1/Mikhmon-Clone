@@ -47,6 +47,10 @@ import '../screens/templates/pdf_templates_screen.dart';
 import '../screens/cards/bulk_add_screen.dart';
 import '../screens/cards/saved_files_screen.dart';
 import '../screens/qahtani/qahtani_link_screen.dart';
+// --- شاشات متقدمة: التقارير + الطرفية + الطوبولوجيا ---
+import '../screens/reporting/reporting_dashboard_screen.dart';
+import '../screens/terminal/terminal_screen.dart';
+import '../screens/network/network_topology_screen.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -546,6 +550,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/main/qahtani-link',
             name: 'qahtani_link',
             builder: (context, state) => const QahtaniLinkScreen(),
+          ),
+          // === مسارات متقدمة: التقارير + الطرفية + الطوبولوجيا ===
+          GoRoute(
+            path: '/main/reporting',
+            name: 'reporting_dashboard',
+            builder: (context, state) => const ReportingDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/main/terminal',
+            name: 'terminal',
+            builder: (context, state) => const TerminalScreen(),
+          ),
+          GoRoute(
+            path: '/main/topology',
+            name: 'topology',
+            builder: (context, state) => const NetworkTopologyScreen(),
           ),
           // === نهاية المسارات الجديدة ===
           GoRoute(

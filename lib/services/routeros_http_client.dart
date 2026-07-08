@@ -351,4 +351,58 @@ class RouterOSHttpClient implements MikrotikClient {
     }
     return '';
   }
+
+  // ─── Advanced: Terminal + Network Discovery ───
+
+  @override
+  Future<List<Map<String, dynamic>>> talk(String command,
+      {List<String>? args}) async {
+    // تحويل صيغة API (commands مثل '/ip/address/print?detail=') إلى REST URL
+    final cleanCmd = command.replaceFirst('/', '').replaceAll('/', '.');
+    final url = '/$cleanCmd';
+    final query = <String, dynamic>{};
+    if (args != null) {
+      for (final a in args) {
+        if (a.isEmpty) continue;
+        final eq = a.indexOf('=');
+        if (eq > 0) {
+          final key = a.substring(eq + 1);
+          final value = a.substring(0, eq);
+          // '?key=val' → query[key]=val; '=key=val' → body[key]=val
+          if (value.isEmpty) {
+            query[key] = '';
+          } else {
+            query[key] = value;
+          }
+        }
+      }
+    }
+    final response = await _dio!.get(url, queryParameters: query);
+    final data = response.data;
+    if (data is List) {
+      return data.cast<Map<String, dynamic>>();
+    }
+    if (data is Map && data.containsKey('data') && data['data'] is List) {
+      return (data['data'] as List).cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getLldpNeighbors() async {
+    try {
+      return await talk('/ip/neighbor/discovery/print');
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getInterfaceDetails() async {
+    try {
+      return await talk('/interface/print', args: ['detail=']);
+    } catch (_) {
+      return getInterfaceStats();
+    }
+  }
 }

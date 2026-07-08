@@ -40,5 +40,20 @@ abstract class MikrotikClient {
   Future<void> createBackup(String name);
   Future<void> exportConfig(String name);
   Future<String> downloadFile(String name);
+
+  // ─── Advanced: Terminal + Network Discovery ───
+
+  /// ينفذ أمراً عاماً على الراوتر (للطرفية المدمجة).
+  /// [command] مسار الأمر بدون الـ query params، مثلاً '/ip/address/print'.
+  /// [args] معطيات إضافية بصيغة MikroTik ('?name=value' أو '=name=value').
+  Future<List<Map<String, dynamic>>> talk(String command, {List<String>? args});
+
+  /// يجلب جيران LLDP/CDP لتشخيص طوبولوجيا الشبكة.
+  /// RouterOS path: /ip/neighbor/discovery-protocol/print
+  Future<List<Map<String, dynamic>>> getLldpNeighbors();
+
+  /// يجلب تفاصيل الواجهات مع إحصائيات rx/tx bytes (للـ Topology + Bottleneck).
+  Future<List<Map<String, dynamic>>> getInterfaceDetails();
+
   void close();
 }
