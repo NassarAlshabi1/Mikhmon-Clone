@@ -60,6 +60,7 @@ class QuickActionsGrid extends StatelessWidget {
         icon: Icons.add_card_rounded,
         label: 'Create Vouchers',
         color: const Color(0xFF8B5CF6), // Purple
+        // BulkAddScreen (يدعم صورة الخلفية + قالب قابل للسحب)
         onTap: () => context.push('/main/vouchers/generate'),
       ),
       QuickActionItem(
@@ -120,7 +121,7 @@ class QuickActionsGrid extends StatelessWidget {
         icon: Icons.description_outlined,
         label: 'PDF Templates',
         color: const Color(0xFF8B5CF6), // Violet
-        onTap: () => context.push('/main/settings/pdf-templates'),
+        onTap: () => context.push('/main/templates/pdf'),
       ),
       QuickActionItem(
         icon: Icons.document_scanner_outlined,

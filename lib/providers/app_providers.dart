@@ -40,9 +40,13 @@ import '../screens/activity_logs/activity_logs_screen.dart';
 import '../screens/feedback/feedback_screen.dart';
 import '../screens/main/main_shell_screen.dart';
 import '../screens/files/files_screen.dart';
-import '../screens/settings/pdf_templates_editor_screen.dart';
 import '../screens/tools/process_image_screen.dart';
 import '../screens/backup/backup_system_screen.dart';
+// --- شاشات جديدة: القوالب والكروت والقحطاني ---
+import '../screens/templates/pdf_templates_screen.dart';
+import '../screens/cards/bulk_add_screen.dart';
+import '../screens/cards/saved_files_screen.dart';
+import '../screens/qahtani/qahtani_link_screen.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -496,11 +500,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: 'voucher_template_editor',
                 builder: (context, state) => const VoucherTemplateEditorScreen(),
               ),
-              GoRoute(
-                path: 'pdf-templates',
-                name: 'pdf_templates_editor',
-                builder: (context, state) => const PdfTemplatesEditorScreen(),
-              ),
             ],
           ),
           GoRoute(
@@ -526,10 +525,29 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'generate',
                 name: 'generate_vouchers',
-                builder: (context, state) => const VoucherGenerationScreen(),
+                // تم استبدال VoucherGenerationScreen بشاشة BulkAddScreen
+                // الجديدة التي تدعم صورة الخلفية والقوالب القابلة للسحب.
+                builder: (context, state) => const BulkAddScreen(),
               ),
             ],
           ),
+          // === مسارات جديدة: القوالب والكروت والقحطاني ===
+          GoRoute(
+            path: '/main/templates/pdf',
+            name: 'pdf_templates',
+            builder: (context, state) => const PdfTemplatesScreen(),
+          ),
+          GoRoute(
+            path: '/main/cards/saved',
+            name: 'saved_files',
+            builder: (context, state) => const SavedFilesScreen(),
+          ),
+          GoRoute(
+            path: '/main/qahtani-link',
+            name: 'qahtani_link',
+            builder: (context, state) => const QahtaniLinkScreen(),
+          ),
+          // === نهاية المسارات الجديدة ===
           GoRoute(
             path: '/main/logs',
             name: 'activity_logs',
