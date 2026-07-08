@@ -119,7 +119,11 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       await OnboardingService.setSetupCompleted();
 
       if (mounted) {
-        context.go('/main/dashboard');
+        // Dashboard requires an active router connection (ShellRoute
+        // redirect checks service.isConnected). After setup the user
+        // has only saved app preferences (country/currency/company),
+        // so send them to login to connect to a router first.
+        context.go('/login');
       }
     } catch (e) {
       if (mounted) {
@@ -138,7 +142,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   }
 
   void _skipSetup() {
-    context.go('/main/dashboard');
+    // Skipping setup still requires a router connection before the
+    // dashboard can be shown (ShellRoute redirect). Go to login.
+    context.go('/login');
   }
 
   @override
