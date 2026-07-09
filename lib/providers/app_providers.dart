@@ -51,6 +51,8 @@ import '../screens/qahtani/qahtani_link_screen.dart';
 import '../screens/reporting/reporting_dashboard_screen.dart';
 import '../screens/terminal/terminal_screen.dart';
 import '../screens/network/network_topology_screen.dart';
+// --- شاشة البحث المتقدم ---
+import '../screens/search/advanced_search_screen.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -566,6 +568,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/main/topology',
             name: 'topology',
             builder: (context, state) => const NetworkTopologyScreen(),
+          ),
+          GoRoute(
+            path: '/main/advanced-search',
+            name: 'advanced_search',
+            builder: (context, state) => const AdvancedSearchScreen(),
           ),
           // === نهاية المسارات الجديدة ===
           GoRoute(

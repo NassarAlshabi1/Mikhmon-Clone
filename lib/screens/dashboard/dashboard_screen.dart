@@ -546,6 +546,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            // صف ثالث: البحث المتقدم
+            Row(
+              children: [
+                Expanded(
+                  child: _buildToolShortcut(
+                    icon: Icons.search_rounded,
+                    label: 'البحث المتقدم',
+                    color: const Color(0xFFF97316),
+                    onTap: () => context.push('/main/advanced-search'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // عنصر نائب للمحافظة على التماثل
+                const Expanded(child: SizedBox()),
+                const SizedBox(width: 8),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
           ],
         ),
       ),
